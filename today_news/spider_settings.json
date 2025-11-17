@@ -1,0 +1,30 @@
+{
+  "美联社": {
+    "proxy": false,
+    "selenium": false
+  },
+  "中時新聞網": {
+    "proxy": false,
+    "selenium": false,
+  },
+  "中央通讯社": {
+    "proxy": false,
+    "selenium": false
+  },
+  "NOWnews今日新聞": {
+    "proxy": true,
+    "selenium": false
+  },
+  "法国国际广播电台": {
+    "proxy": true,
+    "selenium": false
+  },
+  "TVBS新聞網": {
+    "proxy": false,
+    "selenium": false
+  },
+  "世界新闻网": {
+    "proxy": false,
+    "selenium": false
+  }
+}

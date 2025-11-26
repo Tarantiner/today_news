@@ -53,16 +53,24 @@ DOWNLOAD_DELAY = 1
 #}
 
 
-# 每个spider的独立配置，用来配置是否启用代理，是否启用模拟器
+# 每个spider的独立配置，用来配置是否启用爬虫，是否启用代理，是否启用模拟器，爬虫优先级，爬虫自定义设置
 try:
     SPIDER_SETTINGS = json.load(open('./spider_settings.json', 'r', encoding='utf-8'))
 except:
     SPIDER_SETTINGS = {}
 
+# 是否启用新闻时间过滤（只采集前一天到现在的新闻）
+ENABLE_NEWS_TIME_FILTER = True
 
-# # 下载图片路径
-# IMAGES_STROE = os.path.join(os.path.dirname(__file__), 'images')
-# os.makedirs(IMAGES_STROE, exist_ok=True)
+# redis配置
+REDIS_URL = 'redis://:@127.0.0.1:6379/5'
+# redis键名过期时间
+REDIS_DUPE_KEY_EXPIRE_TIME = 48 * 60 * 60
+# redis去重键名前缀
+REDIS_DUPE_KEY_PREFIX = 'scrapy:dupefilter:'
+# 下载封面路径
+IMAGES_STORE = os.path.join(os.path.dirname(__file__), 'cover')
+os.makedirs(IMAGES_STORE, exist_ok=True)
 
 # 代理配置
 PROXY_ADDR = 'http://127.0.0.1:7890'
@@ -73,8 +81,9 @@ STATS_CLASS = 'today_news.custom_stats.CustomStatsCollector'
 # 中间件配置
 DOWNLOADER_MIDDLEWARES = {
     # 'today_news.middlewares.RandomUserAgentMiddleware': 400,
-    'today_news.middlewares.ProxyMiddleware': 100,
-    # 'today_news.middlewares.SeleniumMiddleware': 200,
+    'today_news.middlewares.RedisDuplicateMiddleware': 100,
+    'today_news.middlewares.ProxyMiddleware': 200,
+    # 'today_news.middlewares.SeleniumSnapshotMiddleware': 200,
     'today_news.middlewares.FixedUserAgentMiddleware': 400,
 }
 
@@ -89,9 +98,10 @@ DOWNLOADER_MIDDLEWARES = {
 ITEM_PIPELINES = {
    # "today_news.pipelines.TodayNewsPipeline": 300,
    "today_news.pipelines.DropPipeline": 100,
-   "today_news.pipelines.DupePipeline": 200,
-   "today_news.pipelines.RobustImagesPipeline": 300,
-   "today_news.pipelines.MysqlPipeline": 400,
+   # "today_news.pipelines.DupePipeline": 200,
+   "today_news.pipelines.CleanPipeline": 300,
+   "today_news.pipelines.RobustImagesPipeline": 800,
+   "today_news.pipelines.MysqlPipeline": 900,
 }
 
 MYSQL_CONFIG = {

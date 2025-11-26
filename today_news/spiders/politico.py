@@ -1,17 +1,18 @@
-import re
+import os
 import scrapy
 import datetime
+from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
-class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "中央通讯社"
-    allowed_domains = ["cna.com.tw"]
+
+class PoliticoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "POLITICO"
+    allowed_domains = ["politico.eu"]
     start_urls = [
-        # "https://www.cna.com.tw/atomfeed_cfp.xml",  # 没有发布时间，不采集
-        "https://www.cna.com.tw/googlenewssitemap_fromremote_cfp.xml",
+        "https://www.politico.eu/news-sitemap.xml"
     ]
 
     # 统一utc时间字符串
@@ -40,29 +41,23 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
             return ''
 
-    def clean_txt(self, txt):
-        return txt.strip().replace('<![CDATA[', '').replace(']]>', '').strip()
-
     def parse_detail(self, response):
-        is_nav = response.xpath('//div[@class="paragraph"]//a[text()="看完整報導"]')  # 早安世界
-        if is_nav:  # 类似 https://www.cna.com.tw/news/ahel/202511195001.aspx
-            # print(response.url)
-            return
-        d1 = response.xpath('//div[@class="paragraph"][1]')
+        d1 = response.xpath('//div[@class="sidebar-grid__content article__content"]')
         clean_text = d1.xpath('.//p').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
+                # print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
 
         if not itm.get('images'):
-            img_url = response.xpath('//div[@class="centralContent"]/div[@class="fullPic"]//picture/img/@src').extract_first('')
+            img_url = response.xpath('//div[@class="hero__media "]/figure/img/@src').extract_first('')
             if img_url:
-                img_caption = response.xpath('//div[@class="centralContent"]/div[@class="fullPic"]//picture/img/@alt').extract_first('')
+                img_caption = response.xpath('//div[@class="hero__media "]/figure/figcaption/div[@class="figcaption__inner"]/text()').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}
@@ -85,15 +80,15 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #     yield failure.request.meta['item']
 
     def parse(self, response):
-        response.selector.remove_namespaces()
-        if 'google' in response.url:
+        if response.request.url == self.start_urls[0]:
+            response.selector.remove_namespaces()
             for itm in response.xpath('//url'):
                 url = itm.xpath('./loc/text()').extract_first('')
-                if not url:
+                if not url or url == 'https://www.politico.eu':
                     continue
                 if self.match_invalid_url(url):
                     continue
-                title = self.clean_txt(itm.xpath('./news/title/text()').extract_first(''))
+                title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
                 pub_time = self.parse_time(itm.xpath('./news/publication_date/text()').extract_first(''))
@@ -104,40 +99,11 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
-                mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = ''
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()').extract_first('')
+                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = self.clean_txt(itm.xpath('./news/keywords/text()').extract_first(''))
-                images = []
-
-                itm = TodayNewsItem(
-                    url=url,
-                    pub_time=pub_time,
-                    mod_time=mod_time,
-                    title=title,
-                    desc=desc,
-                    lang=lang,
-                    content=content,
-                    source=source,
-                    keywords=keywords,
-                    name=self.name,
-                    images=images,
-                )
-                # yield itm
-                yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
-                                     callback=self.parse_detail, errback=self.parse_detail_failed)
-        else:
-            source = response.xpath('./title/text()').extract_first('')
-            for itm in response.xpath('//entry'):
-                url = itm.xpath('./link/@href').extract_first('')
-                pub_time = ''
-                mod_time = self.parse_time(itm.xpath('./updated/text()').extract_first(''))
-                title = itm.xpath('./title/text()').extract_first('')
-                desc = self.clean_txt(itm.xpath('./summary/text()').extract_first(''))
-                lang = ''
-                content = ''
                 keywords = ''
                 images = []
 

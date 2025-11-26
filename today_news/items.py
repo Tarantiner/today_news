@@ -19,6 +19,6 @@ class TodayNewsItem(scrapy.Item):
     source = scrapy.Field()  # 来源
     keywords = scrapy.Field()  # 关键词
     name = scrapy.Field()  # 网站名（可以和来源不一致）
-    images = scrapy.Field()
-    image_paths = scrapy.Field()
+    images = scrapy.Field()  # 下载前图片信息
+    image_info = scrapy.Field()  # 下载后图片信息
 

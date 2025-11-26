@@ -11,6 +11,7 @@ from scrapy.exceptions import DropItem
 import pymysql
 import logging
 import scrapy
+import langid
 
 
 class DropPipeline:
@@ -18,11 +19,11 @@ class DropPipeline:
 
     def process_item(self, item, spider):
         if not item.get('title'):
-            raise DropItem("缺少标题字段")
+            raise DropItem(f"缺少标题字段|{item.get('url')}")
         if not item.get('content'):
-            raise DropItem("缺少内容字段")
+            raise DropItem(f"缺少内容字段|{item.get('url')}")
         if not item.get('pub_time'):
-            raise DropItem("缺少发布时间字段")
+            raise DropItem(f"缺少发布时间字段|{item.get('url')}")
         return item
 
 
@@ -39,6 +40,54 @@ class DupePipeline:
         return item
 
 
+class CleanPipeline:
+    """再次清洗管道"""
+    supported_langs = [
+        'af', 'am', 'an', 'ar', 'as', 'az', 'be', 'bg', 'bn', 'br', 'bs',
+        'ca', 'cs', 'cy', 'da', 'de', 'dz', 'el', 'en', 'eo', 'es', 'et',
+        'eu', 'fa', 'fi', 'fo', 'fr', 'ga', 'gl', 'gu', 'he', 'hi', 'hr',
+        'ht', 'hu', 'hy', 'id', 'is', 'it', 'ja', 'jv', 'ka', 'kk', 'km',
+        'kn', 'ko', 'ku', 'ky', 'la', 'lb', 'lo', 'lt', 'lv', 'mg', 'mk',
+        'ml', 'mn', 'mr', 'ms', 'mt', 'nb', 'ne', 'nl', 'nn', 'no', 'oc',
+        'or', 'pa', 'pl', 'ps', 'pt', 'qu', 'ro', 'ru', 'rw', 'se', 'si',
+        'sk', 'sl', 'sq', 'sr', 'sv', 'sw', 'ta', 'te', 'th', 'tl', 'tr',
+        'ug', 'uk', 'ur', 'vi', 'vo', 'wa', 'xh', 'zh', 'zu'
+    ]
+
+    def process_item(self, item, spider):
+        # 统一修改时间规范
+        if not item['mod_time']:
+            item['mod_time'] = '1970-01-01 00:00:00'
+
+        # 统一语言规范
+        lang = item['lang'].lower()
+        if lang:
+            if 'zh-' in lang or 'zh_' in lang:
+                lang = 'zh'
+            elif lang == 'eng' or 'en-' in lang or 'en_' in lang:
+                lang = 'en'
+            elif lang == 'spa':
+                lang = 'es'
+            elif lang not in self.supported_langs:
+                try:
+                    lang1 = langid.classify(item["title"]+item["desc"])[0]
+                    print(f'处理了新语言{lang}-{lang1}', item['url'])
+                    lang = lang1
+                except:
+                    lang = ""
+        else:
+            try:
+                lang = langid.classify(item["title"] + item["desc"])[0]
+                print(f'处理了没语言{lang}', item['url'])
+            except:
+                lang = ""
+        item["lang"] = lang
+
+
+
+        return item
+
+
 class RobustImagesPipeline(ImagesPipeline):
     """下载新闻图片管道"""
 
@@ -52,31 +101,26 @@ class RobustImagesPipeline(ImagesPipeline):
             if image.get('url'):
                 yield scrapy.Request(
                     image['url'],
-                    meta={'image_info': image, 'item': item}
+                    meta={'alt': image.get('caption') or ''}
                 )
+                break
 
     def item_completed(self, results, item, info):
         """处理下载完成的图片"""
-        image_paths = []
+        image_info = {}
 
-        for result in results:
-            print('图片结果', result)
-            success, image_info = result
-            original_image = image_info.get('meta', {}).get('image_info', {})
-
+        for success, info in results:
             if success:
                 # 下载成功
-                original_image['downloaded'] = True
-                original_image['local_path'] = image_info['path']
-                image_paths.append(image_info['path'])
+                lis = [i['caption'] for i in item['images'] if i['url']==info['url']]
+                image_caption = lis[0] if len(lis)>=1 else ''
+                image_info = {'checksum': info['checksum'], 'file_path': info['path'], 'caption': image_caption}
+                break
             else:
-                # 下载失败，记录错误但不中断
-                original_image['downloaded'] = False
-                original_image['error'] = 'Download failed'  # {'url': xx, 'caption': xx, 'img_time': xx, 'download': False, 'error': 'Download failed'}
-                self.logger.warning(f"图片下载失败: {original_image.get('url')}")
+                self.logger.warning(f"图片下载失败")
 
         # 即使有图片下载失败，也返回item
-        item['image_paths'] = image_paths
+        item['image_info'] = image_info
         return item
 
     def handle_download_error(self, failure, request, info):
@@ -130,24 +174,37 @@ class MysqlPipeline:
         try:
             conn = self.get_connection()
             with conn.cursor() as cursor:
-                sql_str = '''
+                # 插入封面
+                image_info = item.get('image_info') or {}
+                cover_id = image_info.get('checksum') or ''
+                image_path = image_info.get('file_path') or ''
+                caption = image_info.get('caption') or ''
+
+                if cover_id and image_path:
+                    cover_sql_str = 'INSERT IGNORE INTO cover (checksum, filepath, caption) VALUES (%s, %s, %s)'
+                    cursor.execute(cover_sql_str, (cover_id, image_path, caption))
+
+                # 插入新闻
+                article_sql_str = '''
                 INSERT IGNORE INTO news 
-                (url, source, title, `desc`, content, lang, pub_time, mod_time) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                (url, source, title, `desc`, keywords, content, lang, pub_time, mod_time, name, cover_id) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 '''
-                cursor.execute(sql_str, (
+                cursor.execute(article_sql_str, (
                     item['url'].strip(),
                     item['source'].strip(),
                     item['title'].strip(),
                     item['desc'].strip(),
+                    item['keywords'].strip(),
                     item['content'].strip(),
                     item['lang'].strip(),
                     item['pub_time'].strip(),
                     item['mod_time'].strip(),
+                    item['name'].strip(),
+                    image_info.get('checksum') or ''
                 ))
                 conn.commit()
         except Exception as e:
             self.logger.error(f'数据入库失败|{type(e)}')
 
         return item
-

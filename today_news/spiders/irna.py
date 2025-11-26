@@ -1,37 +1,27 @@
-import re
+import os
 import scrapy
 import datetime
+from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "中時新聞網"
-    allowed_domains = ["chinatimes.com"]
-    start_urls = ["https://www.chinatimes.com/robots.txt"]
+class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "伊朗伊斯兰共和国通讯社"
+    allowed_domains = ["irna.ir"]
+    start_urls = [
+        "https://en.irna.ir/sitemap/news/sitemap.xml",
+        "https://zh.irna.ir/sitemap/news/sitemap.xml"
+    ]
 
     # 统一utc时间字符串
     def parse_time(self, time_str):
         try:
             if not time_str:
                 return ''
-            # 直接解析带时区的时间
-            dt = datetime.datetime.fromisoformat(time_str)  # Python 3.7+
-            print(dt)  # 2025-11-09 16:46:27-05:00
-
-            # 格式化为字符串
-            formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
-            # print(formatted)  # 2025-11-09 16:46:27
-
-            # 转换为本地时间
-            local_dt = dt.astimezone()
-            # print(local_dt.strftime("%Y-%m-%d %H:%M:%S %Z"))  # 2025-11-10 05:46:27 CST
-
-            # 转换为UTC时间
-            utc_dt = dt.astimezone(datetime.timezone.utc)
-            format_time = utc_dt.strftime("%Y-%m-%d %H:%M:%S")  # 2025-11-09 21:46:27 UTC
+            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
             print(f'{time_str}==>{format_time}')
             return format_time
         except Exception as e:
@@ -39,7 +29,8 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             return ''
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@class="article-body"]')
+        d1 = response.xpath('//article[@id="item"]')
+        d1 = response.xpath('//div[@class="item-body"]')
         clean_text = d1.xpath('.//p').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
@@ -51,22 +42,6 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
-
-        if not itm.get('images'):
-            img_url = response.xpath('//div[@class="main-figure"]/figure/div/img/@src').extract_first('')
-            if img_url:
-                img_caption = response.xpath('//div[@class="main-figure"]/figure/div/img/@alt').extract_first('')
-                img_time = ''
-                images = [
-                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-                ]
-                images = images
-            else:
-                images = []
-            itm['images'] = images
-
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
@@ -80,7 +55,14 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         # else:
         #     yield failure.request.meta['item']
 
-    def parse_url_list(self, response):
+    def parse(self, response):
+        if response.request.url == 'https://en.irna.ir/sitemap/news/sitemap.xml':
+            lang = 'en'
+        elif response.request.url == 'https://zh.irna.ir/sitemap/news/sitemap.xml':
+            lang = 'zh'
+        else:
+            return
+
         response.selector.remove_namespaces()
         for itm in response.xpath('//url'):
             url = itm.xpath('./loc/text()').extract_first('')
@@ -88,10 +70,10 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 continue
             if self.match_invalid_url(url):
                 continue
-            title = itm.xpath('./news/title/text()').extract_first('')
+            title = os.path.basename(parse.urlparse(url).path)
             if not title:
                 continue
-            pub_time = self.parse_time(itm.xpath('./news/publication_date/text()').extract_first(''))
+            pub_time = self.parse_time(itm.xpath('./news/lastmod/text()').extract_first(''))
             if not pub_time:
                 continue
             # 检查过期资讯并过滤
@@ -99,13 +81,23 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 self.logger.info(f'新闻过期：{pub_time}|{url}')
                 continue
 
-            mod_time = ''
+            mod_time = pub_time
             desc = ''
-            lang = itm.xpath('./news/publication/language/text()').extract_first('')
+            lang = lang
             content = ''
-            source = itm.xpath('./news/publication/name/text()').extract_first('')
+            source = ''
             keywords = ''
-            images = []
+
+            img_url = itm.xpath('./image/loc/text()').extract_first('')
+            if img_url:
+                img_caption = ''
+                img_time = ''
+                images = [
+                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                ]
+                images = images
+            else:
+                images = []
 
             itm = TodayNewsItem(
                 url=url,
@@ -123,12 +115,3 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             # yield itm
             yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
                                  callback=self.parse_detail, errback=self.parse_detail_failed)
-
-    def parse(self, response):
-        url_list = re.findall('https://www.chinatimes.com/sitemaps/sitemap_todaynews\w{0,3}.xml', response.text)
-        if len(url_list) > 0:
-            self.logger.info(f'找到{len(url_list)}个新闻列表url')
-            for url in url_list:
-                yield scrapy.Request(url, callback=self.parse_url_list)
-        else:
-            self.logger.warning(f'未找到新闻列表url')

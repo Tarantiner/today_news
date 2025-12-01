@@ -78,7 +78,7 @@
   },
   "伊朗伊斯兰共和国通讯社": {
     "py_name": "irna",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -100,7 +100,7 @@
   },
   "赫芬顿邮报": {
     "py_name": "huffpost",
-    "enabled": false,
+    "enabled": true,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -155,6 +155,17 @@
   },
   "战区新闻网": {
     "py_name": "twz",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+    "华尔街日报": {
+    "py_name": "wsj",
     "enabled": false,
     "proxy": true,
     "selenium": false,

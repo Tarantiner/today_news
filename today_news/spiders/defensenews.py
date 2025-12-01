@@ -39,10 +39,14 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                print(_p)
+                # print(_p)
                 txt_list.append(_p)
         itm = response.meta['item']
         itm['content'] = '\n'.join(txt_list)
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('images'):
             img_url = response.xpath('//div[contains(@class, "ArticleHeader__LeadArtWrapper")]/figure/picture/img/@src').extract_first('')
@@ -87,7 +91,7 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
-                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time):
+                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
@@ -97,17 +101,7 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
                 keywords = ''
-
-                img_url = itm.xpath('./image/loc/text()').extract_first('')
-                if img_url:
-                    img_caption = itm.xpath('./image/caption/text()').extract_first('')
-                    img_time = ''
-                    images = [
-                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-                    ]
-                    images = images
-                else:
-                    images = []
+                images = []
 
                 itm = TodayNewsItem(
                     url=url,

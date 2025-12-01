@@ -108,7 +108,7 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if not pub_time:
                 continue
             # 检查过期资讯并过滤
-            if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time):
+            if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
                 self.logger.info(f'新闻过期：{pub_time}|{url}')
                 continue
 
@@ -118,7 +118,17 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             content = ''
             source = ''
             keywords = ''
-            images = []
+
+            img_url = itm.xpath('./image/loc/text()').extract_first('')
+            if img_url:
+                img_caption = itm.xpath('./image/title/text()').extract_first('')
+                img_time = ''
+                images = [
+                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                ]
+                images = images
+            else:
+                images = []
 
             itm = TodayNewsItem(
                 url=url,

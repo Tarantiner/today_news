@@ -10,7 +10,7 @@ from today_news.middlewares import DupeFiltered
 
 class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "赫芬顿邮报"
-    allowed_domains = ["huffpost.com"]
+    allowed_domains = ["huffpost.com", "huffingtonpost.com"]
     start_urls = [
         "https://www.huffpost.com/static-assets/isolated/huffpostsitemapgeneratorjob-prod-public/us/sitemaps/sitemap-google-news.xml"
     ]
@@ -39,6 +39,10 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('images'):
             img_url = response.xpath('//div[@class="main-figure"]/figure/div/img/@src').extract_first('')
@@ -81,7 +85,7 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
-                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time):
+                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS') or 1):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 

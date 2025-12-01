@@ -50,10 +50,15 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
 
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
+
         if not itm.get('images'):
-            img_url = response.xpath('//div[contains(@class, "ArticleHeader__LeadArtWrapper")]/figure/picture/img/@src').extract_first('')
-            if img_url:
-                img_caption = response.xpath('//div[contains(@class, "ArticleHeader__LeadArtWrapper")]/figcaption/text()').extract_first('')
+            img_list = response.xpath('//div[contains(@class, "imageSlide")]/picture[contains(@data-crop, "crop")]//img')
+            if img_list:
+                img_url = img_list[0].xpath('./@src').extract_first('')
+                img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}
@@ -91,7 +96,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
-                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time):
+                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 

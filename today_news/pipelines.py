@@ -83,8 +83,6 @@ class CleanPipeline:
                 lang = ""
         item["lang"] = lang
 
-
-
         return item
 
 
@@ -98,10 +96,9 @@ class RobustImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         """为每个图片URL创建请求"""
         for image in item.get('images', []):
-            if image.get('url'):
+            if image.get('url') and image['url'].startswith('http'):
                 yield scrapy.Request(
                     image['url'],
-                    meta={'alt': image.get('caption') or ''}
                 )
                 break
 

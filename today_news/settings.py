@@ -60,13 +60,14 @@ try:
 except:
     SPIDER_SETTINGS = {}
 
-# 是否启用新闻时间过滤（只采集前一天到现在的新闻）
+# 是否启用新闻时间过滤（若为1，指的是从前一天0:00到现在的新闻，ps：若有重复交给去重中间件）
 ENABLE_NEWS_TIME_FILTER = True
+NEWS_EXPIRE_DAYS = 1
 
 # redis配置
 REDIS_URL = 'redis://:@127.0.0.1:6379/5'
 # redis键名过期时间
-REDIS_DUPE_KEY_EXPIRE_TIME = 48 * 60 * 60
+REDIS_DUPE_KEY_EXPIRE_TIME = 60 * 60 * 24 * 2
 # redis去重键名前缀
 REDIS_DUPE_KEY_PREFIX = 'scrapy:dupefilter:'
 # 下载封面路径

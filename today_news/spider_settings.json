@@ -12,7 +12,7 @@
   },
   "中時新聞網": {
     "py_name": "chinatimes",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -78,7 +78,7 @@
   },
   "伊朗伊斯兰共和国通讯社": {
     "py_name": "irna",
-    "enabled": false,
+    "enabled": true,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -142,8 +142,19 @@
       "DOWNLOAD_DELAY": 1
     }
   },
-    "防务新闻": {
+  "防务新闻": {
     "py_name": "defensenews",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "战区新闻网": {
+    "py_name": "twz",
     "enabled": false,
     "proxy": true,
     "selenium": false,

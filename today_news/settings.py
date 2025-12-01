@@ -52,6 +52,7 @@ DOWNLOAD_DELAY = 1
 #    "today_news.middlewares.TodayNewsDownloaderMiddleware": 543,
 #}
 
+DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'   # 什么都不过滤
 
 # 每个spider的独立配置，用来配置是否启用爬虫，是否启用代理，是否启用模拟器，爬虫优先级，爬虫自定义设置
 try:

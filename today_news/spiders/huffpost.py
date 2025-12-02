@@ -39,6 +39,8 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
@@ -91,7 +93,7 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
                 mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
+                lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
                 keywords = itm.xpath('./news/keywords/text()').extract_first('')
@@ -106,7 +108,6 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     images = images
                 else:
                     images = []
-
 
                 itm = TodayNewsItem(
                     url=url,

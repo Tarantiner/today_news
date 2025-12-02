@@ -52,8 +52,8 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+        if not itm['content']:
+            itm['content'] = 'content'
 
         if not itm.get('images'):
             img_url = response.xpath('//figure[contains(@class, "featured-image")]//img[contains(@class, "object-cover")]/@src').extract_first('')
@@ -76,6 +76,9 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
             itm['desc'] = desc
+
+        if not itm.get('keywords'):
+            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
         pub_time = self.parse_time(response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
         if pub_time:

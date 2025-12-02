@@ -6,42 +6,34 @@ from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "防务新闻"
-    allowed_domains = ["defensenews.com"]
-    start_urls = ["https://www.defensenews.com/arc/outboundfeeds/sitemap-news/?outputType=xml"]
+class WsjSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "华尔街日报"
+    allowed_domains = ["wsj.com"]
+    start_urls = ["https://www.wsj.com/wsjsitemaps/wsj_google_news.xml"]
 
     # 统一utc时间字符串
     def parse_time(self, time_str):
         try:
             if not time_str:
                 return ''
-            try:
-                format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
-            except:
-                format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
+            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
             print(f'{time_str}==>{format_time}')
             return format_time
         except Exception as e:
             self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
             return ''
 
-    def match_invalid_url(self, url):
-        if url.startswith('https://www.defensenews.com/video'):
-            return True
-        return False
-
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@data-gtm-name="Article Body"]')
-        # clean_text = d1.xpath('./article/*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6 or self::p]').xpath('string(.)')
-        clean_text = d1.xpath('./article/div[contains(@class, "ShareBar")]/preceding-sibling::node()').xpath('string(.)')
+        d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
+        clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                # print(_p)
+                # print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
+        # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
             itm['content'] = 'content'
@@ -66,8 +58,6 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
-        if not itm.get('content'):
-            return
         yield itm
 
     def parse_detail_failed(self, failure):
@@ -99,11 +89,21 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
                 mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()').extract_first('')
+                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = ''
-                images = []
+                keywords = itm.xpath('./news/keywords/text()').extract_first('')
+
+                img_url = itm.xpath('./image/loc/text()').extract_first('')
+                if img_url:
+                    img_caption = itm.xpath('./image/title/text()').extract_first('')
+                    img_time = ''
+                    images = [
+                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                    ]
+                    images = images
+                else:
+                    images = []
 
                 itm = TodayNewsItem(
                     url=url,
@@ -120,11 +120,4 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 )
                 # yield itm
                 yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
-                                     # headers=self.special_headers,
                                      callback=self.parse_detail, errback=self.parse_detail_failed)
-                # self.stats_num += 1
-                # if self.stats_num >= 5:
-                #     from scrapy.exceptions import CloseSpider
-                #     # raise CloseSpider('达到阈值')
-                #     print('结束了')
-                #     break

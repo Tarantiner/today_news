@@ -73,6 +73,12 @@ class NowNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 txt_list.append(_p)
         itm = response.meta['item']
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')

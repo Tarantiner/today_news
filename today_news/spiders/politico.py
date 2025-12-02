@@ -53,6 +53,12 @@ class PoliticoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('images'):
             img_url = response.xpath('//div[@class="hero__media "]/figure/img/@src').extract_first('')
@@ -69,6 +75,10 @@ class PoliticoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+
+        mod_time = self.parse_time(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        if mod_time:
+            itm['mod_time'] = mod_time
 
         yield itm
 

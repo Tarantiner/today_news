@@ -75,6 +75,9 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
@@ -143,7 +146,6 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             content = ''
             source = ''
             keywords = ''
-            images = []
 
             img_url = itm.xpath('./image/loc/text()').extract_first('')
             if img_url:

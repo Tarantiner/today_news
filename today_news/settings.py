@@ -71,7 +71,8 @@ REDIS_DUPE_KEY_EXPIRE_TIME = 60 * 60 * 24 * 2
 # redis去重键名前缀
 REDIS_DUPE_KEY_PREFIX = 'scrapy:dupefilter:'
 # 下载封面路径
-IMAGES_STORE = os.path.join(os.path.dirname(__file__), 'cover')
+# IMAGES_STORE = os.path.join(os.path.dirname(__file__), 'cover')
+IMAGES_STORE = 'f:/news_cover'
 os.makedirs(IMAGES_STORE, exist_ok=True)
 
 # 代理配置

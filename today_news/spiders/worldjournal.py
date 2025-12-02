@@ -1,3 +1,4 @@
+import re
 import scrapy
 import datetime
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
@@ -52,11 +53,19 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('images'):
-            img_url = response.xpath('//div[@class="img_box"]/div[@class="img"]/img/@src').extract_first('')
-            if img_url:
-                img_caption = response.xpath('//div[@class="img_box"]/div[@class="img"]/img/@alt').extract_first('')
+            img_list = response.xpath(
+                '//figure[@class="article-content__image"]/picture/img')
+            if img_list:
+                img_url = img_list[0].xpath('./@src').extract_first('')
+                img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}
@@ -69,8 +78,12 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//section[@class="article-content__editor"]/figure/picture/img/@src').extract_first('')
 
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//section[@class="article-content__editor"]/figure/picture/img/@alt').extract_first('')
+        try:
+            mod_time = self.parse_time(re.search('"dateModified": ?"(.*?)"', response.text).group(1))
+            if mod_time:
+                itm['mod_time'] = mod_time
+        except:
+            pass
 
         yield itm
 

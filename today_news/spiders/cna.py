@@ -58,6 +58,11 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        if not itm.get('desc'):
+            itm['desc'] = response.xpath('//meta[@name="description"]/@content').extract_first('')
 
         if not itm.get('images'):
             img_url = response.xpath('//div[@class="centralContent"]/div[@class="fullPic"]//picture/img/@src').extract_first('')

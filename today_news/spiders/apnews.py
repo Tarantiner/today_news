@@ -49,6 +49,8 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:

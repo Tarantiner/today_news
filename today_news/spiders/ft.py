@@ -1,5 +1,7 @@
+import re
 import scrapy
 import datetime
+from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
@@ -10,7 +12,19 @@ from today_news.middlewares import DupeFiltered
 class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "金融时报"
     allowed_domains = ["ft.com"]
-    start_urls = ["https://www.ft.com/sitemaps/index.xml"]
+    start_urls = ["https://www.ft.com/sitemaps/news.xml"]
+
+    # 统一utc时间字符串
+    def parse_time2(self, time_str):
+        try:
+            if not time_str:
+                return ''
+            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
+            print(f'{time_str}==>{format_time}')
+            return format_time
+        except Exception as e:
+            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
+            return ''
 
     # 统一utc时间字符串
     def parse_time(self, time_str):
@@ -50,6 +64,34 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@property="og:description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
+
+        try:
+            mod_time = self.parse_time2(re.search('"dateModified": ?"(.*?)"', response.text).group(1))
+            if mod_time:
+                itm['mod_time'] = mod_time
+        except:
+            pass
+
+        if not itm.get('images'):
+            images = []
+            img_url = response.xpath('//meta[@property="og:image"]/@content').extract_first('')
+            if img_url:
+                img_url = parse.unquote(img_url)
+                if img_url.startswith('https://images.ft.com/v3/image/raw/https://'):
+                    img_url = img_url.lstrip('https://images.ft.com/v3/image/raw/')
+                    img_caption = ''
+                    img_time = ''
+                    images = [
+                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                    ]
+                    images = images
+            itm['images'] = images
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
@@ -75,7 +117,7 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.parse_time(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.parse_time2(itm.xpath('./news/publication_date/text()').extract_first(''))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
@@ -83,7 +125,7 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
-                mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = ''
                 desc = ''
                 lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
                 content = ''

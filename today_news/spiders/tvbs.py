@@ -9,7 +9,7 @@ from today_news.middlewares import DupeFiltered
 
 class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "TVBS新聞網"
-    allowed_domains = ["news.tvbs.com.tw"]
+    allowed_domains = ["tvbs.com.tw"]
     start_urls = [
         "https://news.tvbs.com.tw/crontab/sitemap/google",
         "https://news.tvbs.com.tw/crontab/sitemap/latest",
@@ -58,15 +58,23 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                # print([_p])
+                print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('images'):
-            img_url = response.xpath('//div[@class="hero__media "]/figure/img/@src').extract_first('')
-            if img_url:
-                img_caption = response.xpath('//div[@class="hero__media "]/figure/figcaption/div[@class="figcaption__inner"]/text()').extract_first('')
+            img_list = response.xpath(
+                '//div[@class="img_box"]/div[@class="img"]/img')
+            if img_list:
+                img_url = img_list[0].xpath('./@src').extract_first('')
+                img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}
@@ -79,8 +87,9 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+        mod_time = self.parse_time(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        if mod_time:
+            itm['mod_time'] = mod_time
 
         yield itm
 

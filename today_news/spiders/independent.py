@@ -1,3 +1,4 @@
+import re
 import scrapy
 import datetime
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
@@ -38,9 +39,18 @@ class IndependentSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
+
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
 
         if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+            try:
+                itm['keywords'] = ','.join(eval(response.xpath('//meta[@property="keywords"]/@content').extract_first('')))
+            except:
+                pass
 
         yield itm
 
@@ -50,6 +60,20 @@ class IndependentSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #     return
         # else:
         #     yield failure.request.meta['item']
+
+    def match_invalid_url(self, url):
+        # ['extras', 'news', 'deals', 'life-style', 'us', 'home-improvement', 'sport', 'f1', 'asia', 'travel', 'tech',
+        # 'arts-entertainment', 'games', 'voices', 'money', 'cars', 'health-and-fitness', 'bulletin']
+        try:
+            cate = re.search('independent.co.uk/(\S+?)/', url).group(1)
+            if cate in ['news', 'us', 'asia', 'bulletin']:
+                if cate == 'news' and any(['uk/news/health' in url, 'uk/news/business' in url, 'uk/news/science' in url]):
+                    # ['health', 'world', 'science', 'business', 'uk']
+                    return True
+                return False
+            return True
+        except:
+            return False
 
     def parse(self, response):
         if response.request.url == self.start_urls[0]:

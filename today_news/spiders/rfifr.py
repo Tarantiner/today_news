@@ -62,9 +62,26 @@ class RfifrSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 txt_list.append(_p)
         itm = response.meta['item']
         itm['content'] = '\n'.join(txt_list)
+        if not itm['content']:
+            itm['content'] = 'content'
 
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+        if desc:
+            itm['desc'] = desc
+
+        # if not itm.get('images'):
+        #     img_list = response.xpath('//div[contains(@class, "item-image")]/picture//img | //figure[contains(@class, "item-image")]/picture//img')
+        #     if img_list:
+        #         img_url = img_list[0].xpath('./@src').extract_first('')
+        #         img_caption = img_list[0].xpath('./@alt').extract_first('')
+        #         img_time = ''
+        #         images = [
+        #             {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+        #         ]
+        #         images = images
+        #     else:
+        #         images = []
+        #     itm['images'] = images
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')

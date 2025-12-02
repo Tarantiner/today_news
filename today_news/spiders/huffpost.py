@@ -29,7 +29,7 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         d1 = response.xpath('//section[contains(@class, "entry__content-list js-entry-content")]')
-        clean_text = d1.xpath('.//p').xpath('string(.)')
+        clean_text = d1.xpath('.//p | .//h2').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)

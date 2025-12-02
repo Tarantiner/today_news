@@ -59,7 +59,14 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
-            itm['content'] = 'content'
+            if 'tw/cards/' in response.url:
+                desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
+                if desc:
+                    itm['content'] = desc
+                else:
+                    itm['content'] = 'content'
+            else:
+                itm['content'] = 'content'
 
         if not itm.get('desc'):
             itm['desc'] = response.xpath('//meta[@name="description"]/@content').extract_first('')
@@ -114,7 +121,7 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = self.clean_txt(itm.xpath('./news/keywords/text()').extract_first(''))
+                keywords = ''  # 该网站提供的关键词不准
                 images = []
 
                 itm = TodayNewsItem(

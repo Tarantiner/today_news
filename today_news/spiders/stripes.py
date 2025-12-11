@@ -1,19 +1,29 @@
-import re
-import json
 import scrapy
 import datetime
-import traceback
-from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "美联社"
-    allowed_domains = ["apnews.com"]
-    start_urls = ["https://apnews.com/news-sitemap-content.xml"]
+class StripesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "星条旗报"
+    allowed_domains = ["stripes.com"]
+    start_urls = ["https://www.stripes.com/sitemap/storyline-index.xml.gz"]
+
+    async def start(self):
+        url = 'https://www.stripes.com/sitemap/storyline-index.xml.gz'
+
+        # 关键这一行：加上 Accept-Encoding: gzip
+        headers = {
+            'Accept-Encoding': 'gzip, deflate, br',
+        }
+
+        yield scrapy.Request(
+            url,
+            headers=headers,
+            meta={'handle_httpstatus_all': True}
+        )
 
     # 统一utc时间字符串
     def parse_time(self, time_str):

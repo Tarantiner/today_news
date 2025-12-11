@@ -8,10 +8,15 @@
 from itemadapter import ItemAdapter
 from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exceptions import DropItem
+from scrapy.utils.python import to_bytes
+import hashlib
+import traceback
 import pymysql
 import logging
 import scrapy
 import langid
+import base64
+import os
 
 
 class DropPipeline:
@@ -41,7 +46,7 @@ class DupePipeline:
 
 
 class CleanPipeline:
-    """再次清洗管道"""
+    """再次清洗管道，处理语言，统一时间等"""
     supported_langs = [
         'af', 'am', 'an', 'ar', 'as', 'az', 'be', 'bg', 'bn', 'br', 'bs',
         'ca', 'cs', 'cy', 'da', 'de', 'dz', 'el', 'en', 'eo', 'es', 'et',
@@ -83,6 +88,9 @@ class CleanPipeline:
                 lang = ""
         item["lang"] = lang
 
+        if 'is_origin' not in item:
+            item['is_origin'] = True
+
         return item
 
 
@@ -92,6 +100,14 @@ class RobustImagesPipeline(ImagesPipeline):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
+
+    # def file_path(self, request, response=None, info=None, *, item=None):
+    #     """
+    #     自定义图片保存路径和文件名
+    #     这里我们强制使用 URL 的 MD5 作为文件名（带原始扩展名）
+    #     """
+    #     image_guid = hashlib.sha1(to_bytes(request.url)).hexdigest()  # noqa: S324
+    #     return f"full/{image_guid}.jpg.temp"
 
     def get_media_requests(self, item, info):
         """为每个图片URL创建请求"""
@@ -175,6 +191,16 @@ class MysqlPipeline:
                 image_info = item.get('image_info') or {}
                 cover_id = image_info.get('checksum') or ''
                 image_path = image_info.get('file_path') or ''
+                # if image_path:
+                #     try:
+                #         url_sha1_name = image_path.split('/')[1].split('.')[0]
+                #         md5_path = image_path.replace(url_sha1_name, cover_id).rstrip('.temp')
+                #         old_path = os.path.join(spider.settings.get('IMAGES_STORE'), image_path)
+                #         new_path = old_path.replace(url_sha1_name, cover_id).rstrip('.temp')
+                #         os.rename(old_path, new_path)
+                #         image_path = md5_path
+                #     except:
+                #         image_path = ''
                 caption = image_info.get('caption') or ''
 
                 if cover_id and image_path:
@@ -203,5 +229,30 @@ class MysqlPipeline:
                 conn.commit()
         except Exception as e:
             self.logger.error(f'数据入库失败|{type(e)}')
+
+        return item
+
+
+class ImageProcessPipeline:
+    """图片处理成base64注入到数据里"""
+
+    def process_item(self, item, spider):
+        image_info = item.get('image_info') or {}
+        image_path = image_info.get('file_path') or ''
+        if image_path:
+            file_path = os.path.join(spider.settings.get('IMAGES_STORE'), image_path)
+            if not os.path.exists(file_path):
+                item['image_info'] = {}
+            else:
+                try:
+                    with open(file_path, 'rb')as f:
+                        b = base64.b64encode(f.read()).decode()
+                    image_info.pop('file_path', None)
+                    image_info['data'] = b
+                except:
+                    print(f'处理图片异常|{traceback.format_exc()}')
+                    item['image_info'] = {}
+        else:
+            item['image_info'] = {}
 
         return item

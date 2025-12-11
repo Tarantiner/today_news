@@ -1,19 +1,28 @@
-import re
-import json
 import scrapy
 import datetime
-import traceback
-from urllib import parse
+import random
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "美联社"
-    allowed_domains = ["apnews.com"]
-    start_urls = ["https://apnews.com/news-sitemap-content.xml"]
+class TheHillSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "国会山报"
+    allowed_domains = ["thehill.com"]
+    start_urls = ["https://thehill.com/news/"]
+
+    async def start(self):
+        IMPERSONATE_LIST = [
+            "chrome110"
+        ]
+
+        for url in self.start_urls:
+            impersonate = random.choice(IMPERSONATE_LIST)
+            yield scrapy.Request(url, meta={
+                'use_curl_cffi': True,
+                'curl_cffi_impersonate': impersonate
+            })
 
     # 统一utc时间字符串
     def parse_time(self, time_str):

@@ -1,59 +1,87 @@
 import re
-import json
 import scrapy
+import demjson3
 import datetime
-import traceback
-from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "美联社"
-    allowed_domains = ["apnews.com"]
-    start_urls = ["https://apnews.com/news-sitemap-content.xml"]
+class NyTimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "纽约时报"
+    allowed_domains = ["nytimes.com", "nyt.com"]
+    start_urls = ["https://www.nytimes.com/sitemaps/new/news.xml.gz"]
 
     # 统一utc时间字符串
     def parse_time(self, time_str):
         try:
             if not time_str:
                 return ''
-            # 直接解析带时区的时间
-            dt = datetime.datetime.fromisoformat(time_str)  # Python 3.7+
-            print(dt)  # 2025-11-09 16:46:27-05:00
-
-            # 格式化为字符串
-            formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
-            # print(formatted)  # 2025-11-09 16:46:27
-
-            # 转换为本地时间
-            local_dt = dt.astimezone()
-            # print(local_dt.strftime("%Y-%m-%d %H:%M:%S %Z"))  # 2025-11-10 05:46:27 CST
-
-            # 转换为UTC时间
-            utc_dt = dt.astimezone(datetime.timezone.utc)
-            format_time = utc_dt.strftime("%Y-%m-%d %H:%M:%S")  # 2025-11-09 21:46:27 UTC
+            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
             print(f'{time_str}==>{format_time}')
             return format_time
         except Exception as e:
             self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
             return ''
 
+    def match_invalid_url(self, url):
+        # ['athletic', 'interactive', 'live', 'article', '2025', 'es', 'newsgraphics']
+        # try:
+        #     cate = re.search('nytimes.com/(\S+?)/', url).group(1)
+        #     if cate in ['athletic', 'interactive', 'live', 'es', 'newsgraphics', 'article']:
+        #         return True
+        #     return False
+        # except:
+        #     return False
+        try:
+            if re.match('^https://www.nytimes.com/\d+/\d+/\d+/world/\S+$', url):
+                return False
+            return True
+        except:
+            return False
+
     def parse_detail(self, response):
-        d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
-        clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                # print([_p])
-                txt_list.append(_p)
+        # d1 = response.xpath('//section[@name="articleBody"]')
+        # clean_text = d1.xpath('./div[contains(@class, "StoryBodyCompanionColumn")]//p').xpath('string(.)')
+        # txt_list = []
+        # for p in clean_text.extract():
+        #     _p = self.clean_phrase(p)
+        #     if _p:
+        #         print([_p])
+        #         txt_list.append(_p)
+        # itm = response.meta['item']
+        # # print('\n'.join(txt_list))
+        # itm['content'] = '\n'.join(txt_list)
+        # if not itm['content']:
+        #     itm['content'] = 'content'
+
         itm = response.meta['item']
-        # print('\n'.join(txt_list))
-        itm['content'] = '\n'.join(txt_list)
-        if not itm['content']:
+        try:
+            txt_list = []
+            s = re.search('<script>window.__preloadedData = (.*?);</script>', response.text).group(1)
+            data = demjson3.decode(s)
+            itm_list = data['initialData']['data']['article']['sprinkledBody']['content']
+            for _itm in itm_list:
+                if _itm.get('__typename') == 'ParagraphBlock':
+                    content_list = _itm.get('content') or []
+                    p_txt_list = []
+                    for content in content_list:
+                        if content.get('__typename') == 'TextInline':
+                            txt = content['text']
+                            if txt:
+                                p_txt_list.append(txt)
+                            # _p = self.clean_phrase(txt)
+                            # if _p:
+                            #     print([_p])
+                            #     txt_list.append(_p)
+                    txt_list.append(''.join(p_txt_list))
+            itm['content'] = '\n'.join(txt_list)
+            if not itm['content']:
+                itm['content'] = 'content'
+            # desc = data['initialData']['data']['article']['summary']
+        except:
+            self.logger.warning(f'提取{response.url}内容失败')
             itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
@@ -61,7 +89,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['desc'] = desc
 
         if not itm.get('images'):
-            img_list = response.xpath('//div[contains(@class, "imageSlide")]/picture[contains(@data-crop, "crop")]//img')
+            img_list = response.xpath('//figure[@aria-label="media"]//picture/img')
             if img_list:
                 img_url = img_list[0].xpath('./@src').extract_first('')
                 img_caption = img_list[0].xpath('./@alt').extract_first('')
@@ -75,7 +103,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['images'] = images
 
         if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
+            itm['keywords'] = response.xpath('//meta[@name="news_keywords"]/@content').extract_first('')
 
         yield itm
 
@@ -111,8 +139,18 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = ''
-                images = []
+                keywords = itm.xpath('./news/keywords/text()').extract_first('')
+
+                img_url = itm.xpath('./image/loc/text()').extract_first('')
+                if img_url:
+                    img_caption = ''
+                    img_time = ''
+                    images = [
+                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                    ]
+                    images = images
+                else:
+                    images = []
 
                 itm = TodayNewsItem(
                     url=url,
@@ -130,3 +168,4 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 # yield itm
                 yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
                                      callback=self.parse_detail, errback=self.parse_detail_failed)
+

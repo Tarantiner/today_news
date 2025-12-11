@@ -16,6 +16,7 @@ class TodayNewsItem(scrapy.Item):
     desc = scrapy.Field()  # 描述（摘要）
     lang = scrapy.Field()  # 语言
     content = scrapy.Field()  # 内容
+    is_origin = scrapy.Field()  # 是否原创
     source = scrapy.Field()  # 来源
     keywords = scrapy.Field()  # 关键词
     name = scrapy.Field()  # 网站名（可以和来源不一致）

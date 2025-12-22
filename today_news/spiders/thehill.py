@@ -1,4 +1,5 @@
 import scrapy
+import json
 import datetime
 import random
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
@@ -10,78 +11,33 @@ from today_news.middlewares import DupeFiltered
 class TheHillSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "国会山报"
     allowed_domains = ["thehill.com"]
-    start_urls = ["https://thehill.com/news/"]
+    start_urls = ["https://thehill.com/news-sitemap.xml"]
+    IMPERSONATE_LIST = [
+        "chrome110"
+    ]
 
     async def start(self):
-        IMPERSONATE_LIST = [
-            "chrome110"
-        ]
 
         for url in self.start_urls:
-            impersonate = random.choice(IMPERSONATE_LIST)
             yield scrapy.Request(url, meta={
                 'use_curl_cffi': True,
-                'curl_cffi_impersonate': impersonate
+                'curl_cffi_impersonate': self.IMPERSONATE_LIST[0]
             })
 
-    # 统一utc时间字符串
-    def parse_time(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            # 直接解析带时区的时间
-            dt = datetime.datetime.fromisoformat(time_str)  # Python 3.7+
-            print(dt)  # 2025-11-09 16:46:27-05:00
-
-            # 格式化为字符串
-            formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
-            # print(formatted)  # 2025-11-09 16:46:27
-
-            # 转换为本地时间
-            local_dt = dt.astimezone()
-            # print(local_dt.strftime("%Y-%m-%d %H:%M:%S %Z"))  # 2025-11-10 05:46:27 CST
-
-            # 转换为UTC时间
-            utc_dt = dt.astimezone(datetime.timezone.utc)
-            format_time = utc_dt.strftime("%Y-%m-%d %H:%M:%S")  # 2025-11-09 21:46:27 UTC
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
     def parse_detail(self, response):
-        d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
-        clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                # print([_p])
-                txt_list.append(_p)
         itm = response.meta['item']
-        # print('\n'.join(txt_list))
-        itm['content'] = '\n'.join(txt_list)
+        try:
+            content = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())[
+                'articleBody']
+            itm['content'] = content.replace('. ', '.\n').replace('\xa0 ', '\n')
+        except:
+            itm['content'] = ''
         if not itm['content']:
             itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
             itm['desc'] = desc
-
-        if not itm.get('images'):
-            img_list = response.xpath('//div[contains(@class, "imageSlide")]/picture[contains(@data-crop, "crop")]//img')
-            if img_list:
-                img_url = img_list[0].xpath('./@src').extract_first('')
-                img_caption = img_list[0].xpath('./@alt').extract_first('')
-                img_time = ''
-                images = [
-                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-                ]
-                images = images
-            else:
-                images = []
-            itm['images'] = images
 
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
@@ -107,21 +63,32 @@ class TheHillSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.parse_time(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
-                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
+                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
+                        'NEWS_EXPIRE_DAYS')):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
-                mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = ''
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
+                lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = ''
-                images = []
+                keywords = itm.xpath('./news/keywords/text()').extract_first('')
+
+                img_url = itm.xpath('./image/loc/text()').extract_first('')
+                if img_url:
+                    img_caption = ''
+                    img_time = ''
+                    images = [
+                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                    ]
+                    images = images
+                else:
+                    images = []
 
                 itm = TodayNewsItem(
                     url=url,
@@ -137,5 +104,6 @@ class TheHillSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     images=images,
                 )
                 # yield itm
-                yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
+                yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True, 'use_curl_cffi': True,
+                                                'curl_cffi_impersonate': self.IMPERSONATE_LIST[0]},
                                      callback=self.parse_detail, errback=self.parse_detail_failed)

@@ -1,7 +1,7 @@
 {
   "美联社": {
     "py_name": "apnews",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -254,6 +254,72 @@
   },
   "欧亚时报": {
     "py_name": "eurasiantimes",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "NHK": {
+    "py_name": "nhk",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "美国有线电视新闻网": {
+    "py_name": "edition_cnn",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "卫报": {
+    "py_name": "theguardian",
+    "enabled": true,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "华盛顿邮报": {
+    "py_name": "washingtonpost",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 5
+    }
+  },
+  "德国之声": {
+    "py_name": "dw",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "custom_settings": {
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+    "彭博社": {
+    "py_name": "bloomberg",
     "enabled": false,
     "proxy": true,
     "selenium": false,

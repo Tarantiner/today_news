@@ -1,80 +1,68 @@
 import re
+import json
 import scrapy
 import datetime
+import traceback
+from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class NowNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "NOWnews今日新聞"
-    allowed_domains = ["nownews.com"]
-    start_urls = ["https://www.nownews.com/newsSitemap-daily.xml"]
-
-    async def start(self):
-        for url in self.start_urls:
-            yield scrapy.Request(
-                url,
-                callback=self.parse,
-                headers={
-                    'sec-fetch-mode': 'navigate',
-                    'sec-fetch-site': 'none',
-                    'sec-fetch-user': '?1',
-                    'upgrade-insecure-requests': '1',
-                },
-            )
+class BloombergSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "彭博社"
+    # allowed_domains = ["bloomberg.com"]
+    start_urls = ["https://www.bloomberg.com/sitemaps/news/latest.xml"]
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@id="articleContent"]')
-
-        xpath_conditions = [
-            'not(ancestor::div[contains(@class,"ad-")])',
-            'not(ancestor::div[contains(@class,"custom-blk")])',
-            'not(ancestor::div[@class="video-container"])',
-            # 'not(ancestor::div[contains(@class, "flex-jc-center")])',
-            'not(ancestor::div[@data-auth])',  # 其他来源
-            'not(ancestor::div[@id="mediaPost"])',  # 图片描述
-            'not(ancestor::div[@id="warning7"])',  # 网站提醒
-        ]
-
-        final_xpath = './/text()[' + ' and '.join(xpath_conditions) + ']'
-        clean_text = d1.xpath(final_xpath)
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                txt_list.append(_p)
         itm = response.meta['item']
-        itm['content'] = '\n'.join(txt_list)
-        if not itm['content']:
+        try:
+            txt_list = []
+            s = response.xpath('//script[@id="__NEXT_DATA__"]/text()').extract_first()
+            data = json.loads(s)
+            itm_list = data['props']['pageProps']['story']['body']['content']
+            for _itm in itm_list:
+                if _itm.get('type') == 'paragraph':
+                    content_list = _itm.get('content') or []
+                    p_txt_list = []
+                    for content in content_list:
+                        if content.get('type') == 'text':
+                            txt = content['value']
+                            if txt:
+                                # print([txt])
+                                p_txt_list.append(txt)
+                    # print([''.join(p_txt_list)])
+                    txt_list.append(''.join(p_txt_list))
+            itm['content'] = '\n'.join(txt_list)
+            if not itm['content']:
+                itm['content'] = 'content'
+            # desc = data['initialData']['data']['article']['summary']
+        except:
+            self.logger.warning(f'提取{response.url}内容失败')
             itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
             itm['desc'] = desc
 
+        if not itm.get('images'):
+            img_url = response.xpath('//meta[@property="og:image"]/@content').extract_first('')
+            if img_url:
+                img_caption = ''
+                img_time = ''
+                images = [
+                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+                ]
+                images = images
+            else:
+                images = []
+            itm['images'] = images
+
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
         yield itm
-
-        # if d1.xpath('./div[@class="custom-blk"]'):
-        #     node_list = d1.xpath('./div[@class="custom-blk"]/preceding-sibling::node()')
-        # else:
-        #     node_list = d1.xpath('./node()')
-        # clean_txt = ''.join([parse_phrase(i) for i in node_list.extract()])
-        #
-        # text = re.sub(r'<div', '<h1', d1.extract_first(), count=1)
-        # text = re.sub(r'</div>(?!.*</div>)', '</h1>', text, flags=re.DOTALL)
-        #
-        # clean_txt2 = remove_tags(remove_tags_with_content(remove_comments(text), ['div']))
-        # print([clean_txt])
-        # print([clean_txt2])
-        # itm = response.meta['item']
-        # itm['content'] = clean_txt2
-        # # d1.xpath('//node()[not(self::div[@class="custom-blk"]) and not(preceding-sibling::div[@class="custom-blk"])]')
-        # yield itm
 
     def parse_detail_failed(self, failure):
         return
@@ -109,17 +97,7 @@ class NowNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
                 keywords = ''
-
-                img_url = itm.xpath('./image/loc/text()').extract_first('')
-                if img_url:
-                    img_caption = itm.xpath('./image/title/text()').extract_first('')
-                    img_time = ''
-                    images = [
-                        {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-                    ]
-                    images = images
-                else:
-                    images = []
+                images = []
 
                 itm = TodayNewsItem(
                     url=url,

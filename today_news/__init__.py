@@ -9,18 +9,22 @@ host_server = 'http://172.16.201.131:9005'
 # 获取任务
 task_uri = '/task/getTask'
 
+test_mode = True
 
-for _ in range(5):
+
+if test_mode:
     try:
-        res = requests.get(f'{host_server}{task_uri}?node_id={node_id}')
-        SPIDER_SETTINGS = res.json()['data'][0]
-        print(SPIDER_SETTINGS)
-        break
+        SPIDER_SETTINGS = json.load(open('./spider_settings.json', 'r', encoding='utf-8'))
     except:
-        pass
+        SPIDER_SETTINGS = {}
 else:
-    SPIDER_SETTINGS = {}
-# try:
-#     SPIDER_SETTINGS = json.load(open('./spider_settings.json', 'r', encoding='utf-8'))
-# except:
-#     SPIDER_SETTINGS = {}
+    for _ in range(5):
+        try:
+            res = requests.get(f'{host_server}{task_uri}?node_id={node_id}')
+            SPIDER_SETTINGS = res.json()['data'][0]
+            print(SPIDER_SETTINGS)
+            break
+        except:
+            pass
+    else:
+        SPIDER_SETTINGS = {}

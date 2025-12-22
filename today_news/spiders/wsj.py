@@ -11,18 +11,6 @@ class WsjSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["wsj.com"]
     start_urls = ["https://www.wsj.com/wsjsitemaps/wsj_google_news.xml"]
 
-    # 统一utc时间字符串
-    def parse_time(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
     def parse_detail(self, response):
         d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
         clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
@@ -79,7 +67,7 @@ class WsjSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.parse_time(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
@@ -87,9 +75,9 @@ class WsjSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
-                mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
+                lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
                 keywords = itm.xpath('./news/keywords/text()').extract_first('')

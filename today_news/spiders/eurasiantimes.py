@@ -14,35 +14,9 @@ class EurasiantimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["eurasiantimes.com"]
     start_urls = ["https://www.eurasiantimes.com/sitemap_index.xml"]
 
-    # 统一utc时间字符串
-    def parse_time(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            # 直接解析带时区的时间
-            dt = datetime.datetime.fromisoformat(time_str)  # Python 3.7+
-            print(dt)  # 2025-11-09 16:46:27-05:00
-
-            # 格式化为字符串
-            formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
-            # print(formatted)  # 2025-11-09 16:46:27
-
-            # 转换为本地时间
-            local_dt = dt.astimezone()
-            # print(local_dt.strftime("%Y-%m-%d %H:%M:%S %Z"))  # 2025-11-10 05:46:27 CST
-
-            # 转换为UTC时间
-            utc_dt = dt.astimezone(datetime.timezone.utc)
-            format_time = utc_dt.strftime("%Y-%m-%d %H:%M:%S")  # 2025-11-09 21:46:27 UTC
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
     def parse_detail(self, response):
         itm = response.meta['item']
-        pub_time = self.parse_time(response.xpath('//meta[@name="article:published_time"] | //meta[@property="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(response.xpath('//meta[@name="article:published_time"] | //meta[@property="article:published_time"]/@content').extract_first(''))
         if not pub_time:
             return
         # 检查过期资讯并过滤
@@ -94,7 +68,7 @@ class EurasiantimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url.rstrip('/')).path)
             if not title:
                 continue
-            mod_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+            mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(mod_time, self.settings.get('NEWS_EXPIRE_DAYS')):
                 self.logger.info(f'新闻过期：{mod_time}|{url}')

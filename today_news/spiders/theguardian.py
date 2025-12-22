@@ -1,80 +1,64 @@
 import re
+import json
 import scrapy
 import datetime
+import traceback
+from urllib import parse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class NowNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "NOWnews今日新聞"
-    allowed_domains = ["nownews.com"]
-    start_urls = ["https://www.nownews.com/newsSitemap-daily.xml"]
-
-    async def start(self):
-        for url in self.start_urls:
-            yield scrapy.Request(
-                url,
-                callback=self.parse,
-                headers={
-                    'sec-fetch-mode': 'navigate',
-                    'sec-fetch-site': 'none',
-                    'sec-fetch-user': '?1',
-                    'upgrade-insecure-requests': '1',
-                },
-            )
+class TheGuardianSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "卫报"
+    # allowed_domains = ["theguardian.com", "i.guim.co.uk"]
+    start_urls = ["https://www.theguardian.com/sitemaps/news.xml"]
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@id="articleContent"]')
-
-        xpath_conditions = [
-            'not(ancestor::div[contains(@class,"ad-")])',
-            'not(ancestor::div[contains(@class,"custom-blk")])',
-            'not(ancestor::div[@class="video-container"])',
-            # 'not(ancestor::div[contains(@class, "flex-jc-center")])',
-            'not(ancestor::div[@data-auth])',  # 其他来源
-            'not(ancestor::div[@id="mediaPost"])',  # 图片描述
-            'not(ancestor::div[@id="warning7"])',  # 网站提醒
-        ]
-
-        final_xpath = './/text()[' + ' and '.join(xpath_conditions) + ']'
-        clean_text = d1.xpath(final_xpath)
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                txt_list.append(_p)
         itm = response.meta['item']
-        itm['content'] = '\n'.join(txt_list)
+        try:
+            data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+            content_lis = [i for i in data if i['@type']=='NewsArticle']
+            if content_lis:
+                content = content_lis[0]['articleBody']
+            else:
+                content = ''
+            if not content:
+                content_itm_list = sorted([j for i in data if i['@type']=='LiveBlogPosting' for j in i['liveBlogUpdate']], key=lambda x: x['datePublished'])
+                content_list = []
+                for content_itm in content_itm_list:
+                    _time = content_itm['datePublished']
+                    _content = content_itm['articleBody'].rstrip('\n')
+                    if not _content:
+                        continue
+                    content_list.append(f'{_time}:\n{_content}\n' if {_time} else f'{_content}\n')
+                content = '\n'.join(content_list)
+            itm['content'] = content
+        except:
+            itm['content'] = ''
+
+        # 文章里提取
         if not itm['content']:
-            itm['content'] = 'content'
+            d1 = response.xpath('//div[@id="maincontent"]')
+            clean_text = d1.xpath('./div//p[contains(@class, "dcr")]').xpath('string(.)')
+            txt_list = []
+            for p in clean_text.extract():
+                _p = self.clean_phrase(p)
+                if _p:
+                    # print([_p])
+                    txt_list.append(_p)
+            itm = response.meta['item']
+            # print('\n'.join(txt_list))
+            itm['content'] = '\n'.join(txt_list)
+            if not itm['content']:
+                itm['content'] = 'content'
 
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
             itm['desc'] = desc
 
-        if not itm.get('keywords'):
-            itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
-
         yield itm
-
-        # if d1.xpath('./div[@class="custom-blk"]'):
-        #     node_list = d1.xpath('./div[@class="custom-blk"]/preceding-sibling::node()')
-        # else:
-        #     node_list = d1.xpath('./node()')
-        # clean_txt = ''.join([parse_phrase(i) for i in node_list.extract()])
-        #
-        # text = re.sub(r'<div', '<h1', d1.extract_first(), count=1)
-        # text = re.sub(r'</div>(?!.*</div>)', '</h1>', text, flags=re.DOTALL)
-        #
-        # clean_txt2 = remove_tags(remove_tags_with_content(remove_comments(text), ['div']))
-        # print([clean_txt])
-        # print([clean_txt2])
-        # itm = response.meta['item']
-        # itm['content'] = clean_txt2
-        # # d1.xpath('//node()[not(self::div[@class="custom-blk"]) and not(preceding-sibling::div[@class="custom-blk"])]')
-        # yield itm
 
     def parse_detail_failed(self, failure):
         return
@@ -103,16 +87,16 @@ class NowNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     self.logger.info(f'新闻过期：{pub_time}|{url}')
                     continue
 
-                mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first('').strip('\n '))
                 desc = ''
                 lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = ''
+                keywords = itm.xpath('./news/keywords/text()').extract_first('')
 
                 img_url = itm.xpath('./image/loc/text()').extract_first('')
                 if img_url:
-                    img_caption = itm.xpath('./image/title/text()').extract_first('')
+                    img_caption = ''
                     img_time = ''
                     images = [
                         {'url': img_url, 'caption': img_caption, 'img_time': img_time}

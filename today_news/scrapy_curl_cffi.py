@@ -47,7 +47,7 @@ class CurlCffiDownloadHandler(HTTPDownloadHandler):
                 )
 
                 # 构造 Scrapy 的 Response 对象
-                print(resp.status_code)
+                # print(resp.status_code)
                 resp_headers = Headers(resp.headers)
                 if 'Content-Encoding' in resp_headers:
                     del resp_headers['Content-Encoding']  # 关键！

@@ -46,18 +46,6 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             callback=self.parse_cookies,
         )
 
-    # 统一utc时间字符串
-    def parse_time(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%SZ').strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
     def parse_detail(self, response):
         d1 = response.xpath('//div[@class="item-body"]')
         clean_text = d1.xpath('./div/p').xpath('string(.)')
@@ -102,10 +90,10 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if desc:
             itm['desc'] = desc
 
-        pub_time = self.parse_time(response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
         if pub_time:
             itm['pub_time'] = pub_time
-        mod_time = self.parse_time(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -132,7 +120,7 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url).path)
             if not title:
                 continue
-            pub_time = self.parse_time(itm.xpath('./lastmod/text()').extract_first(''))
+            pub_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
             if not pub_time:
                 continue
             # 检查过期资讯并过滤

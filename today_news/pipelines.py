@@ -91,6 +91,9 @@ class CleanPipeline:
         if 'is_origin' not in item:
             item['is_origin'] = True
 
+        item['content'] = item['content'].replace('\xa0', ' ')
+        item['desc'] = item['desc'].replace('\xa0', ' ')
+
         return item
 
 

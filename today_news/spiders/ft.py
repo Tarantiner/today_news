@@ -14,44 +14,6 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["ft.com"]
     start_urls = ["https://www.ft.com/sitemaps/news.xml"]
 
-    # 统一utc时间字符串
-    def parse_time2(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            format_time = datetime.datetime.strptime(time_str, '%Y-%m-%dT%H:%M:%S.%fZ').strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
-    # 统一utc时间字符串
-    def parse_time(self, time_str):
-        try:
-            if not time_str:
-                return ''
-            # 直接解析带时区的时间
-            dt = datetime.datetime.fromisoformat(time_str)  # Python 3.7+
-            print(dt)  # 2025-11-09 16:46:27-05:00
-
-            # 格式化为字符串
-            formatted = dt.strftime("%Y-%m-%d %H:%M:%S")
-            # print(formatted)  # 2025-11-09 16:46:27
-
-            # 转换为本地时间
-            local_dt = dt.astimezone()
-            # print(local_dt.strftime("%Y-%m-%d %H:%M:%S %Z"))  # 2025-11-10 05:46:27 CST
-
-            # 转换为UTC时间
-            utc_dt = dt.astimezone(datetime.timezone.utc)
-            format_time = utc_dt.strftime("%Y-%m-%d %H:%M:%S")  # 2025-11-09 21:46:27 UTC
-            print(f'{time_str}==>{format_time}')
-            return format_time
-        except Exception as e:
-            self.logger.info(f'转换时间失败:{type(e)}|{time_str}')
-            return ''
-
     def parse_detail(self, response):
         d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
         clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
@@ -72,7 +34,7 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['desc'] = desc
 
         try:
-            mod_time = self.parse_time2(re.search('"dateModified": ?"(.*?)"', response.text).group(1))
+            mod_time = self.to_utc_string((re.search('"dateModified": ?"(.*?)"', response.text).group(1)))
             if mod_time:
                 itm['mod_time'] = mod_time
         except:
@@ -117,7 +79,7 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.parse_time2(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.to_utc_string((itm.xpath('./news/publication_date/text()').extract_first('')))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤
@@ -127,10 +89,10 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
                 mod_time = ''
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()' ).extract_first('')
+                lang = itm.xpath('./news/publication/language/text()').extract_first('')
                 content = ''
                 source = itm.xpath('./news/publication/name/text()').extract_first('')
-                keywords = ''
+                keywords = itm.xpath('./news/keywords/text()').extract_first('')
                 images = []
 
                 itm = TodayNewsItem(

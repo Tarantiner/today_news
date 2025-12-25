@@ -11,11 +11,13 @@ task_uri = '/task/getTask'
 
 test_mode = True
 
-
 if test_mode:
     try:
         SPIDER_SETTINGS = json.load(open('./spider_settings.json', 'r', encoding='utf-8'))
+        print(SPIDER_SETTINGS)
     except:
+        import traceback
+        print(traceback.format_exc())
         SPIDER_SETTINGS = {}
 else:
     for _ in range(5):

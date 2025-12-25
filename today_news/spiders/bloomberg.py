@@ -42,6 +42,22 @@ class BloombergSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             self.logger.warning(f'提取{response.url}内容失败')
             itm['content'] = 'content'
 
+        # 文章里提取
+        if not itm['content']:
+            d1 = response.xpath('//main[@class="dvz-content"]')
+            clean_text = d1.xpath('./p').xpath('string(.)')
+            txt_list = []
+            for p in clean_text.extract():
+                _p = self.clean_phrase(p)
+                if _p:
+                    # print([_p])
+                    txt_list.append(_p)
+            itm = response.meta['item']
+            # print('\n'.join(txt_list))
+            itm['content'] = '\n'.join(txt_list)
+            if not itm['content']:
+                itm['content'] = 'content'
+
         desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
         if desc:
             itm['desc'] = desc

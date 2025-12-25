@@ -4,6 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 import os
+import re
 import time
 import redis
 import random
@@ -227,6 +228,128 @@ class RedisDuplicateMiddleware:
         #     fp.update(request.body)
 
         return fp.hexdigest()
+
+
+# 过滤绝对无用的url
+class PreRequestFilterMiddleware:
+    """
+    URL预请求过滤中间件
+    在请求发送到网络之前过滤，完全不发送不需要的请求
+    """
+
+    # 定义不需要采集的URL模式
+    DENY_PATTERNS = [
+        # 娱乐类
+        r'/sports?/', r'/musics?/', r'/entertainments?/',
+        r'/movies?/', r'/tv/', r'/showbiz/', r'/celebrity/',
+        r'/gossip/', r'/game/', r'/gaming/', r'/video-game/',
+
+        # 媒体内容
+        r'/video/', r'/audio/', r'/gallery/', r'/photos/',
+        r'/slideshow/', r'/picture/', r'/media/',
+        r'/podcast/', r'/stream/', r'/playlist/',
+
+        # 商业页面
+        r'/shop/', r'/store/', r'/cart/', r'/checkout/',
+        r'/product/', r'/buy/', r'/purchase/', r'/price/',
+        r'/subscription/', r'/premium/', r'/membership/',
+        r'/advertise/', r'/advertisement/', r'/ads/', r'/sponsor/',
+
+        # 其他非新闻
+        r'/blog/', r'/event/', r'/calendar/', r'/job/',
+        r'/career/', r'/recruitment/', r'/hiring/',
+        r'/weather/', r'/horoscope/', r'/lottery/',
+        r'/life/', r'/local/', r'/health/', r'/lotteries',
+    ]
+
+    def __init__(self, stats):
+        self.stats = stats
+        # 预编译正则提高性能
+        self.compiled_patterns = [
+            re.compile(pattern, re.IGNORECASE)
+            for pattern in self.DENY_PATTERNS
+        ]
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        # 必须有的方法，从crawler创建中间件实例
+        return cls(stats=crawler.stats)
+
+    def process_request(self, request, spider):
+        """
+        在请求发送到下载器之前调用
+        如果返回None：继续处理请求
+        如果抛出IgnoreRequest：丢弃请求，完全不发送
+        """
+        # 只过滤非detail页面的url
+        if not request.meta.get('detail', False):
+            return None
+
+        url = request.url
+
+        # 首先检查URL是否需要过滤
+        if self._should_filter(url, spider):
+            # 记录统计信息
+            self.stats.inc_value('url_filter/filtered_total')
+
+            # 记录到spider日志（可选）
+            spider.logger.debug(f'预过滤URL: {url}')
+
+            # 抛出异常，Scrapy会完全丢弃这个请求
+            raise IgnoreRequest(f"URL filtered by deny patterns: {url}")
+
+        # 返回None表示继续处理这个请求
+        return None
+
+    def _should_filter(self, url, spider):
+        """
+        判断URL是否应该被过滤
+        """
+        url_lower = url.lower()
+
+        # 1. 检查是否有爬虫特定的白名单（最高优先级）
+        if hasattr(spider, 'CUSTOM_ALLOW_PATTERNS'):
+            allow_patterns = spider.CUSTOM_ALLOW_PATTERNS
+            for pattern in allow_patterns:
+                if pattern in url_lower:
+                    return False  # 在白名单中，不过滤
+
+        # 2. 检查是否有爬虫特定的黑名单
+        if hasattr(spider, 'CUSTOM_DENY_PATTERNS'):
+            deny_patterns = spider.CUSTOM_DENY_PATTERNS
+            for pattern in deny_patterns:
+                if pattern in url_lower:
+                    return True  # 在爬虫特定黑名单中，过滤
+
+        # 3. 应用全局过滤规则
+        for pattern in self.compiled_patterns:
+            if pattern.search(url):
+                return True
+
+        # # 4. 检查文件扩展名
+        # if self._is_file_url(url):
+        #     return True
+
+        return False
+
+    def _is_file_url(self, url):
+        """检查是否是文件下载链接"""
+        file_extensions = [
+            '.pdf', '.doc', '.docx', '.xls', '.xlsx',
+            '.ppt', '.pptx', '.zip', '.rar', '.tar',
+            '.gz', '.mp3', '.mp4', '.avi', '.mov',
+            '.wmv', '.flv', '.jpg', '.jpeg', '.png',
+            '.gif', '.bmp', '.exe', '.dmg', '.iso',
+        ]
+
+        url_lower = url.lower()
+        for ext in file_extensions:
+            if ext in url_lower:
+                # 确保是文件扩展名，不是路径的一部分
+                if url_lower.endswith(ext) or f'{ext}?' in url_lower or f'{ext}#' in url_lower:
+                    return True
+
+        return False
 
 
 class FixedUserAgentMiddleware:

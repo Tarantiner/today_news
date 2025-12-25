@@ -130,7 +130,7 @@ class RobustImagesPipeline(ImagesPipeline):
                 # 下载成功
                 lis = [i['caption'] for i in item['images'] if i['url']==info['url']]
                 image_caption = lis[0] if len(lis)>=1 else ''
-                image_info = {'checksum': info['checksum'], 'file_path': info['path'], 'caption': image_caption}
+                image_info = {'checksum': info['checksum'], 'file_path': info['path'], 'caption': image_caption, 'url': info['url']}
                 break
             else:
                 self.logger.warning(f"图片下载失败")
@@ -233,6 +233,8 @@ class MysqlPipeline:
         except Exception as e:
             self.logger.error(f'数据入库失败|{type(e)}')
 
+        if item.get('content') == 'content':
+            raise DropItem(f"没有内容: {item['url']}")
         return item
 
 

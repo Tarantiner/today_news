@@ -8,7 +8,7 @@ from today_news.middlewares import DupeFiltered
 
 
 class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "中時新聞網"
+    name = "中国时报"
     allowed_domains = ["chinatimes.com"]
     start_urls = ["https://www.chinatimes.com/robots.txt"]
 

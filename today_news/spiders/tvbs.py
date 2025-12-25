@@ -8,7 +8,7 @@ from today_news.middlewares import DupeFiltered
 
 
 class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "TVBS新聞網"
+    name = "TVBS新闻网"
     allowed_domains = ["tvbs.com.tw"]
     start_urls = [
         "https://news.tvbs.com.tw/crontab/sitemap/google",
@@ -32,7 +32,7 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                print([_p])
+                # print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
         itm['content'] = '\n'.join(txt_list)

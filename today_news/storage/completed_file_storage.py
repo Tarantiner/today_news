@@ -12,10 +12,16 @@ class CompletedFileFeedStorage(FileFeedStorage):
     """
     TEMP_SUFFIX = ".part"  # 写入过程中的临时后缀
 
-    def __init__(self, uri, *, feed_options=None):
+    @classmethod
+    def from_crawler(cls, crawler, uri, *, feed_options=None):
+        """从 crawler 创建实例的工厂方法"""
+        return cls(uri, feed_options=feed_options, crawler=crawler)
+
+    def __init__(self, uri, *, feed_options=None, crawler=None):
         super().__init__(uri)
         # 临时写入路径（.part）
         self.temp_path = self.path + self.TEMP_SUFFIX
+        self.site_id = str(crawler.settings.get('site_id') or "")
 
     def open(self, spider):
         dirname = Path(self.path).parent
@@ -27,5 +33,7 @@ class CompletedFileFeedStorage(FileFeedStorage):
         # 先关闭文件（如果还没关闭）
         file.close()
         # 重命名为最终的 .completed 文件
+        target_dir, target_name = os.path.split(self.path)
+        new_path = os.path.join(target_dir, '--'.join([self.site_id, target_name]))
         if os.path.exists(self.temp_path):
-            os.rename(self.temp_path, self.path)
+            os.rename(self.temp_path, new_path)

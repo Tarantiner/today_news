@@ -117,7 +117,8 @@ STATS_CLASS = 'today_news.custom_stats.CustomStatsCollector'
 DOWNLOADER_MIDDLEWARES = {
     # 'today_news.middlewares.RandomUserAgentMiddleware': 400,
     'today_news.middlewares.RedisDuplicateMiddleware': 100,
-    'today_news.middlewares.ProxyMiddleware': 200,
+    'today_news.middlewares.PreRequestFilterMiddleware': 200,
+    'today_news.middlewares.ProxyMiddleware': 300,
     # 'today_news.middlewares.SeleniumSnapshotMiddleware': 200,
     'today_news.middlewares.FixedUserAgentMiddleware': 400,
 

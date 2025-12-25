@@ -1,22 +1,26 @@
 {
   "美联社": {
     "py_name": "apnews",
-    "enabled": false,
+    "enabled": true,
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "apnews.com",
     "custom_settings": {
+      "site_id": "5327458874595037363",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 5
     }
   },
-  "中時新聞網": {
+  "中国时报": {
     "py_name": "chinatimes",
     "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.chinatimes.com",
     "custom_settings": {
+      "site_id": "932191313407583876",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -27,7 +31,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.cna.com.tw",
     "custom_settings": {
+      "site_id": "5899138366853964765",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -38,7 +44,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.nownews.com",
     "custom_settings": {
+      "site_id": "749167205689488651",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -49,18 +57,22 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.rfi.fr",
     "custom_settings": {
+      "site_id": "8024184681905060942",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
   },
-  "TVBS新聞網": {
+  "TVBS新闻网": {
     "py_name": "tvbs",
-    "enabled": false,
+    "enabled": true,
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "news.tvbs.com.tw",
     "custom_settings": {
+      "site_id": "171618087247509628",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -71,7 +83,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.worldjournal.com",
     "custom_settings": {
+      "site_id": "8944439168043087596",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -82,7 +96,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "en.irna.ir",
     "custom_settings": {
+      "site_id": "8595659402158009476",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -93,7 +109,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.politico.com",
     "custom_settings": {
+      "site_id": "2701174887674597446",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -104,7 +122,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.huffpost.com",
     "custom_settings": {
+      "site_id": "4674283179498916763",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -115,7 +135,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.ft.com",
     "custom_settings": {
+      "site_id": "6254483624143141371",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -126,7 +148,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.independent.co.uk",
     "custom_settings": {
+      "site_id": "5261389012753040748",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -137,7 +161,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.newyorker.com",
     "custom_settings": {
+      "site_id": "501036161576141744",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -148,7 +174,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.defensenews.com",
     "custom_settings": {
+      "site_id": "586475445522944997",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -159,7 +187,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.twz.com",
     "custom_settings": {
+      "site_id": "3996103741399930693",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -170,7 +200,9 @@
     "proxy": false,
     "selenium": false,
     "priority": 0,
+    "domain": "www.wsj.com",
     "custom_settings": {
+      "site_id": "2726552458789855416",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -181,7 +213,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.nytimes.com",
     "custom_settings": {
+      "site_id": "7394826138111038732",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 5
     }
@@ -192,7 +226,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.stripes.com",
     "custom_settings": {
+      "site_id": "4046681102024677922",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -203,7 +239,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "thehill.com",
     "custom_settings": {
+      "site_id": "4270759724978757634",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 5
     }
@@ -214,7 +252,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.foxnews.com",
     "custom_settings": {
+      "site_id": "2995934640836985032",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -225,7 +265,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.nbcnews.com",
     "custom_settings": {
+      "site_id": "5649984333632037618",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -236,7 +278,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.politico.com",
     "custom_settings": {
+      "site_id": "2701174887674597446",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -247,7 +291,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "thedefensepost.com",
     "custom_settings": {
+      "site_id": "4747528554035913727",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 3
     }
@@ -258,7 +304,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.eurasiantimes.com",
     "custom_settings": {
+      "site_id": "4919958457887477937",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -269,7 +317,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.nhk.or.jp",
     "custom_settings": {
+      "site_id": "6693730164696096318",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -280,18 +330,22 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.cnn.com",
     "custom_settings": {
+      "site_id": "4249616204035494304",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
   },
   "卫报": {
     "py_name": "theguardian",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.theguardian.com",
     "custom_settings": {
+      "site_id": "508599358386639856",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
@@ -302,7 +356,9 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.washingtonpost.com",
     "custom_settings": {
+      "site_id": "4490981429145455108",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 5
     }
@@ -313,18 +369,22 @@
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.dw.com",
     "custom_settings": {
+      "site_id": "3542545817427772234",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }
   },
-    "彭博社": {
+  "彭博社": {
     "py_name": "bloomberg",
     "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
+    "domain": "www.bloomberg.com",
     "custom_settings": {
+      "site_id": "3251878667875154516",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }

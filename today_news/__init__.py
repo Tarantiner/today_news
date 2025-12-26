@@ -9,7 +9,7 @@ host_server = 'http://172.16.201.131:9005'
 # 获取任务
 task_uri = '/task/getTask'
 
-test_mode = True
+test_mode = False
 
 if test_mode:
     try:

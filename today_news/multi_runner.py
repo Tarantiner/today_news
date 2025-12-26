@@ -12,24 +12,15 @@ from datetime import datetime
 # warnings.filterwarnings('ignore')  # 禁用所有警告
 
 # 确保日志目录存在
-os.makedirs('./logs', exist_ok=True)
+log_dir = './logs'
+os.makedirs(log_dir, exist_ok=True)
 
 # 配置基础控制台日志
 configure_logging(install_root_handler=True)
 
-# 获取项目设置
-settings = get_project_settings()
-settings.set('TWISTED_REACTOR', 'twisted.internet.selectreactor.SelectReactor')
-priority_spider_list = sorted(
-    [(spider_name, spider_config.get('priority') or 0, spider_config.get('custom_settings') or {}) for
-     spider_name, spider_config in (settings.get('SPIDER_SETTINGS') or {}).items() if spider_config.get('enabled')],
-    key=lambda x: x[1], reverse=True)
 
-
-def setup_spider_file_logging(spider_name):
+def setup_spider_file_logging(name):
     """为每个爬虫设置按日期切割的文件日志"""
-    log_dir = f'./logs/{spider_name}'
-    os.makedirs(log_dir, exist_ok=True)
     # 创建spider特定的日志格式
     formatter = logging.Formatter(
         '%(asctime)s [%(name)s] %(levelname)s: %(message)s',
@@ -38,7 +29,7 @@ def setup_spider_file_logging(spider_name):
 
     # 创建按日期切割的文件处理器
     file_handler = TimedRotatingFileHandler(
-        filename=os.path.join(f'./logs/{spider_name}', f'{spider_name}.log'),
+        filename=os.path.join(log_dir, f'{name}.log'),
         when='midnight',  # 每天午夜切割
         interval=1,  # 每天
         backupCount=7,  # 保留7天
@@ -48,6 +39,20 @@ def setup_spider_file_logging(spider_name):
     file_handler.setLevel(logging.INFO)  # 文件记录所有DEBUG及以上日志
 
     return file_handler
+
+
+# 设置该爬虫的文件日志
+file_handler = setup_spider_file_logging('crawler')
+logging.getLogger('scrapy').addHandler(file_handler)
+
+
+# 获取项目设置
+settings = get_project_settings()
+settings.set('TWISTED_REACTOR', 'twisted.internet.selectreactor.SelectReactor')
+priority_spider_list = sorted(
+    [(spider_name, spider_config.get('priority') or 0, spider_config.get('custom_settings') or {}) for
+     spider_name, spider_config in (settings.get('SPIDER_SETTINGS') or {}).items() if spider_config.get('enabled')],
+    key=lambda x: x[1], reverse=True)
 
 
 @defer.inlineCallbacks
@@ -66,11 +71,7 @@ def crawl():
         # 为每个爬虫创建独立的 runner
         runner = CrawlerRunner(final_settings)
 
-        # 设置该爬虫的文件日志
-        file_handler = setup_spider_file_logging(spider_name)
-        logging.getLogger('scrapy').addHandler(file_handler)
-
-        print(f'启动了 {spider_name}，日志文件: ./logs/{spider_name}/{spider_name}.log')
+        print(f'启动了 {spider_name}')
 
         # 立即启动爬虫，不等待完成
         deferred = runner.crawl(spider_name)

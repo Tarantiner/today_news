@@ -156,7 +156,7 @@ class PoliticoComSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             response.selector.remove_namespaces()
             for itm in response.xpath('//url'):
                 url = itm.xpath('./loc/text()').extract_first('')
-                if self.match_invalid_url(url):
+                if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                     continue
                 cate = re.search('https://www.politico.com/(\S+?)/', url).group(1)  # 'newsletters', 'live-updates', 'news'
                 title = itm.xpath('./news/title/text()').extract_first('')

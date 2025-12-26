@@ -70,7 +70,7 @@ class PoliticoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 url = itm.xpath('./loc/text()').extract_first('')
                 if not url or url == 'https://www.politico.eu':
                     continue
-                if self.match_invalid_url(url):
+                if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                     continue
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:

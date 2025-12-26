@@ -47,7 +47,7 @@ class NHKSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 url = itm.get('page_url') or ''
                 if not url:
                     continue
-                if self.match_invalid_url(url):
+                if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                     continue
                 url = parse.urljoin('https://www3.nhk.or.jp', url)
                 title = itm.get('title') or ''

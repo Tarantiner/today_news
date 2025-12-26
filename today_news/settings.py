@@ -68,6 +68,8 @@ DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'  # 什么都不过滤
 # 是否启用新闻时间过滤（若为1，指的是从前一天0:00到现在的新闻，ps：若有重复交给去重中间件）
 ENABLE_NEWS_TIME_FILTER = True
 NEWS_EXPIRE_DAYS = 1
+# 是否启用新闻url过滤
+ENABLE_NEWS_URL_FILTER = False
 
 # redis配置
 REDIS_URL = 'redis://:@127.0.0.1:6379/5'
@@ -117,7 +119,7 @@ STATS_CLASS = 'today_news.custom_stats.CustomStatsCollector'
 DOWNLOADER_MIDDLEWARES = {
     # 'today_news.middlewares.RandomUserAgentMiddleware': 400,
     'today_news.middlewares.RedisDuplicateMiddleware': 100,
-    'today_news.middlewares.PreRequestFilterMiddleware': 200,
+    'today_news.middlewares.PreRequestFilterMiddleware': 200 if ENABLE_NEWS_URL_FILTER else None,
     'today_news.middlewares.ProxyMiddleware': 300,
     # 'today_news.middlewares.SeleniumSnapshotMiddleware': 200,
     'today_news.middlewares.FixedUserAgentMiddleware': 400,

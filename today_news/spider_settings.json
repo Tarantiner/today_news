@@ -1,7 +1,7 @@
 {
   "美联社": {
     "py_name": "apnews",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -66,7 +66,7 @@
   },
   "TVBS新闻网": {
     "py_name": "tvbs",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -118,7 +118,7 @@
   },
   "赫芬顿邮报": {
     "py_name": "huffpost",
-    "enabled": false,
+    "enabled": true,
     "proxy": true,
     "selenium": false,
     "priority": 0,

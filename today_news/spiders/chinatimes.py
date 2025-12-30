@@ -12,6 +12,11 @@ class ChinatimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["chinatimes.com"]
     start_urls = ["https://www.chinatimes.com/robots.txt"]
 
+    def match_invalid_url(self, url):
+        if any((url.endswith('-260407'), url.endswith('-260417'), url.endswith('-260408'), url.endswith('-260409'))):
+            return False
+        return True
+
     def parse_detail(self, response):
         d1 = response.xpath('//div[@class="article-body"]')
         clean_text = d1.xpath('.//p').xpath('string(.)')

@@ -141,9 +141,10 @@ class SpiderUtils:
         return ''
 
     def match_invalid_url(self, url):
-        if '/video/' in url:
-            return True
         return False
+        # if '/video/' in url:
+        #     return True
+        # return False
 
     def check_expire_news(self, utc_time_str, expire_days):
         # 解析UTC时间

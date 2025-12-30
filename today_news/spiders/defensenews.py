@@ -11,11 +11,6 @@ class DefensenewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["defensenews.com"]
     start_urls = ["https://www.defensenews.com/arc/outboundfeeds/sitemap-news/?outputType=xml"]
 
-    def match_invalid_url(self, url):
-        if url.startswith('https://www.defensenews.com/video'):
-            return True
-        return False
-
     def parse_detail(self, response):
         d1 = response.xpath('//div[@data-gtm-name="Article Body"]')
         # clean_text = d1.xpath('./article/*[self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6 or self::p]').xpath('string(.)')

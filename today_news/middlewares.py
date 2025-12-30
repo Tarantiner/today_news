@@ -9,6 +9,7 @@ import time
 import redis
 import random
 import hashlib
+from urllib import parse
 from scrapy.http import HtmlResponse
 from selenium import webdriver
 from scrapy.exceptions import IgnoreRequest
@@ -239,6 +240,20 @@ class PreRequestFilterMiddleware:
 
     # 定义不需要采集的URL模式
     DENY_PATTERNS = [
+        # 目前真实找到的
+        '/tv-and-radio/', '/football/', '/commentisfree/', '/science/', '/books/', '/film/', '/environment/',
+        '/lifeandstyle/', '/education/', '/culture/', '/thefilter-us/', '/money/', '/travel/', '/food/', '/stage/',
+        '/fashion/', '/games/', '/artanddesign/', '/cities/', '/law/',
+        '/inequality/', '/sport/', '/music/', '/media/', '/bulletin/', '/arts-entertainment/',
+        '/extras/', '/life-style/', '/health-and-wellbeing/', '/climate-change/',
+        '/fun/', '/cars/', '/esg/', '/local/', '/entertainment/', '/life/', '/sports/',
+        '/health/', '/compilation/', '/生态/', '/运动天地/', '/homenews/', '/newsletters/', '/hilltv/',
+        '/regulation/', '/senate/',
+        '/state-watch/', '/the-gavel/', '/energy-environment/', '/healthcare/',
+        '/nexstar_media_wire/', '/health-care/', '/house/',
+        '/congress-blog/',
+        '/style/', '/climate/', '/weather/', '/deals/', '/lifestyle/', '/food-drink/', '/pop-culture/',
+
         # 娱乐类
         r'/sports?/', r'/musics?/', r'/entertainments?/',
         r'/movies?/', r'/tv/', r'/showbiz/', r'/celebrity/',
@@ -305,7 +320,7 @@ class PreRequestFilterMiddleware:
         """
         判断URL是否应该被过滤
         """
-        url_lower = url.lower()
+        url_lower = parse.unquote(url.lower()).rstrip('/')
 
         # 1. 检查是否有爬虫特定的白名单（最高优先级）
         if hasattr(spider, 'CUSTOM_ALLOW_PATTERNS'):
@@ -512,7 +527,8 @@ class SeleniumMiddleware:
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
 
-        self.driver = webdriver.Chrome(options=chrome_options, executable_path=r'C:\Users\admin\Python39\chromedriver83.exe')
+        self.driver = webdriver.Chrome(options=chrome_options,
+                                       executable_path=r'C:\Users\admin\Python39\chromedriver83.exe')
 
     @classmethod
     def from_crawler(cls, crawler):

@@ -12,6 +12,44 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["worldjournal.com"]
     start_urls = ["https://www.worldjournal.com/sitemap/gnews"]
 
+    def match_invalid_url(self, url):
+        # 財經 {'121209', '121477', '121347', '121208'}
+        # 美國 {'121618', '121469', '121172', '121177'}
+        # 洛杉磯 {'121359', '122693', '121471', '121360', '121365'}
+        # 觀點 {'121201', '121206'}
+        # 川普2.0 {'124279', '121468', '121148', '124278', '124277'}
+        # 中國 {'121474', '121343', '121341', '121344', '121339'}
+        # 紐約 {'121382', '121470', '121381', '121390', '121388'}
+        # 生活 {'121617', '121271', '121266', '121268'}
+        # 國際 {'124211', '121257', '123308', '121488', '121261', '121480', '121256'}
+        # 健康 {'121238', '121240', '121242', '122009'}
+        # 藝文 {'121251', '121250', '121428', '121535', '121253', '124667', '121252', '122163'}
+        # 台灣 {'121223', '121475', '121218', '121222', '121221', '121220'}
+        # 運動 {'121226', '121225', '121229', '121517', '121227'}
+        # 娛樂 {'121235', '121233', '121478', '121234', '121232'}
+        # 消費 {'122986', '122985', '122981', '122984', '122982'}
+        # 教育 {'122038'}
+        # 舊金山 {'121368', '121375', '121374', '121369', '121519', '121472'}
+        # 地方 {'121278', '121275', '121274', '121277', '121282', '121473'}
+        # 汽車 {'121318'}
+        # 周刊 {'124683'}
+        if any((
+                '/story/121617/' in url, '/story/121271/' in url, '/story/121266/' in url,
+                '/story/121268/' in url, '/story/121238/' in url, '/story/121240/' in url,
+                '/story/121242/' in url, '/story/122009/' in url,
+                '/story/121251/' in url, '/story/121250/' in url, '/story/121428/' in url,
+                '/story/121535/' in url, '/story/121253/' in url, '/story/124667/' in url,
+                '/story/121252/' in url, '/story/122163/' in url,
+                '/story/121226/' in url, '/story/121225/' in url, '/story/121229/' in url,
+                '/story/121517/' in url, '/story/121227/' in url, '/story/121235/' in url,
+                '/story/121233/' in url, '/story/121478/' in url, '/story/121234/' in url,
+                '/story/121232/' in url, '/story/122986/' in url, '/story/122985/' in url,
+                '/story/122981/' in url, '/story/122984/' in url, '/story/122982/' in url,
+                '/story/122038/' in url, '/story/121318/' in url, '/story/124683/' in url,
+        )):
+            return True
+        return False
+
     def clean_txt(self, txt):
         return txt.strip().replace('![CDATA[', '').replace(']]', '').strip()
 
@@ -71,6 +109,10 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     def parse_url_list(self, response):
         response.selector.remove_namespaces()
         for itm in response.xpath('//url'):
+            # try:
+            #     cate = re.search('-- cate：(.*?) \|', itm.extract()).group(1)
+            # except:
+            #     pass
             url = itm.xpath('./loc/text()').extract_first('')
             if not url:
                 continue

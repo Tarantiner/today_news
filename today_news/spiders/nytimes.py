@@ -13,21 +13,21 @@ class NyTimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["nytimes.com", "nyt.com"]
     start_urls = ["https://www.nytimes.com/sitemaps/new/news.xml.gz"]
 
-    def match_invalid_url(self, url):
-        # ['athletic', 'interactive', 'live', 'article', '2025', 'es', 'newsgraphics']
-        # try:
-        #     cate = re.search('nytimes.com/(\S+?)/', url).group(1)
-        #     if cate in ['athletic', 'interactive', 'live', 'es', 'newsgraphics', 'article']:
-        #         return True
-        #     return False
-        # except:
-        #     return False
-        try:
-            if re.match('^https://www.nytimes.com/\d+/\d+/\d+/world/\S+$', url):
-                return False
-            return True
-        except:
-            return False
+    # def match_invalid_url(self, url):
+    #     # ['athletic', 'interactive', 'live', 'article', '2025', 'es', 'newsgraphics']
+    #     # try:
+    #     #     cate = re.search('nytimes.com/(\S+?)/', url).group(1)
+    #     #     if cate in ['athletic', 'interactive', 'live', 'es', 'newsgraphics', 'article']:
+    #     #         return True
+    #     #     return False
+    #     # except:
+    #     #     return False
+    #     try:
+    #         if re.match('^https://www.nytimes.com/\d+/\d+/\d+/world/\S+$', url):
+    #             return False
+    #         return True
+    #     except:
+    #         return False
 
     def parse_detail(self, response):
         # d1 = response.xpath('//section[@name="articleBody"]')

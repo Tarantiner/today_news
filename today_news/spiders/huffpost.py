@@ -12,6 +12,7 @@ class HuffpostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "赫芬顿邮报"
     allowed_domains = ["huffpost.com", "huffingtonpost.com"]
     start_urls = [
+        # 'https://www.huffpost.com/static-assets/isolated/huffpostsitemapgeneratorjob-prod-public/us/sitemaps/sitemap-politics.xml',
         "https://www.huffpost.com/static-assets/isolated/huffpostsitemapgeneratorjob-prod-public/us/sitemaps/sitemap-google-news.xml"
     ]
 

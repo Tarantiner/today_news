@@ -142,14 +142,14 @@ class PoliticoComSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         # else:
         #     yield failure.request.meta['item']
 
-    def match_invalid_url(self, url):
-        try:
-            cate = re.search('https://www.politico.com/(\S+?)/', url).group(1)
-            if cate in ['newsletters', 'live-updates', 'news']:
-                return False
-            return True
-        except:
-            return True
+    # def match_invalid_url(self, url):
+    #     try:
+    #         cate = re.search('https://www.politico.com/(\S+?)/', url).group(1)
+    #         if cate in ['newsletters', 'live-updates', 'news']:
+    #             return False
+    #         return True
+    #     except:
+    #         return True
 
     def parse(self, response):
         if response.request.url == self.start_urls[0]:

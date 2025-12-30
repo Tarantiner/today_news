@@ -13,15 +13,15 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     allowed_domains = ["foxnews.com"]
     start_urls = ["https://www.foxnews.com/sitemap.xml?type=news"]
 
-    def match_invalid_url(self, url):
-        # ['us', 'deals', 'politics', 'food-drink', 'health', 'tech', 'sports', 'opinion', 'world', 'lifestyle', 'entertainment', 'media', 'travel']
-        try:
-            cate = re.search('foxnews.com/(\S+?)/', url).group(1)
-            if cate in ['deals', 'food-drink', 'health', 'sports', 'lifestyle', 'article', 'entertainment', 'travel']:
-                return True
-            return False
-        except:
-            return False
+    # def match_invalid_url(self, url):
+    #     # ['us', 'deals', 'politics', 'food-drink', 'health', 'tech', 'sports', 'opinion', 'world', 'lifestyle', 'entertainment', 'media', 'travel']
+    #     try:
+    #         cate = re.search('foxnews.com/(\S+?)/', url).group(1)
+    #         if cate in ['deals', 'food-drink', 'health', 'sports', 'lifestyle', 'article', 'entertainment', 'travel']:
+    #             return True
+    #         return False
+    #     except:
+    #         return False
 
     def parse_detail(self, response):
         # d1 = response.xpath('//div[@class="article-body"]')

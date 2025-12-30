@@ -14,6 +14,11 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         "https://www.cna.com.tw/googlenewssitemap_fromremote_cfp.xml",
     ]
 
+    def match_invalid_url(self, url):
+        if any(('/aipl/' in url, '/aopl/' in url, '/acn/' in url, '/aie/' in url)):
+            return False
+        return True
+
     def clean_txt(self, txt):
         return txt.strip().replace('<![CDATA[', '').replace(']]>', '').strip()
 

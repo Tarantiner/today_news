@@ -49,19 +49,19 @@ class IndependentSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         # else:
         #     yield failure.request.meta['item']
 
-    def match_invalid_url(self, url):
-        # ['extras', 'news', 'deals', 'life-style', 'us', 'home-improvement', 'sport', 'f1', 'asia', 'travel', 'tech',
-        # 'arts-entertainment', 'games', 'voices', 'money', 'cars', 'health-and-fitness', 'bulletin']
-        try:
-            cate = re.search('independent.co.uk/(\S+?)/', url).group(1)
-            if cate in ['news', 'us', 'asia', 'bulletin']:
-                if cate == 'news' and any(['uk/news/health' in url, 'uk/news/business' in url, 'uk/news/science' in url]):
-                    # ['health', 'world', 'science', 'business', 'uk']
-                    return True
-                return False
-            return True
-        except:
-            return False
+    # def match_invalid_url(self, url):
+    #     # ['extras', 'news', 'deals', 'life-style', 'us', 'home-improvement', 'sport', 'f1', 'asia', 'travel', 'tech',
+    #     # 'arts-entertainment', 'games', 'voices', 'money', 'cars', 'health-and-fitness', 'bulletin']
+    #     try:
+    #         cate = re.search('independent.co.uk/(\S+?)/', url).group(1)
+    #         if cate in ['news', 'us', 'asia', 'bulletin']:
+    #             if cate == 'news' and any(['uk/news/health' in url, 'uk/news/business' in url, 'uk/news/science' in url]):
+    #                 # ['health', 'world', 'science', 'business', 'uk']
+    #                 return True
+    #             return False
+    #         return True
+    #     except:
+    #         return False
 
     def parse(self, response):
         if response.request.url == self.start_urls[0]:

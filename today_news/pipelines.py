@@ -235,6 +235,7 @@ class MysqlPipeline:
 
         if item.get('content') == 'content':
             raise DropItem(f"没有内容: {item['url']}")
+        # raise DropItem(f"不生成文件: {item['url']}")
         return item
 
 

@@ -1,4 +1,5 @@
 import re
+import random
 import scrapy
 import demjson3
 import datetime
@@ -12,6 +13,10 @@ class NyTimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "纽约时报"
     allowed_domains = ["nytimes.com", "nyt.com"]
     start_urls = ["https://www.nytimes.com/sitemaps/new/news.xml.gz"]
+    IMPERSONATE_LIST = [
+        # "chrome110",
+        "chrome110",
+    ]
 
     # def match_invalid_url(self, url):
     #     # ['athletic', 'interactive', 'live', 'article', '2025', 'es', 'newsgraphics']
@@ -154,6 +159,11 @@ class NyTimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     images=images,
                 )
                 # yield itm
-                yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
-                                     callback=self.parse_detail, errback=self.parse_detail_failed)
+                impersonate = random.choice(self.IMPERSONATE_LIST)
+                yield scrapy.Request(url, meta={
+                    'snapshot': True, 'item': itm, 'detail': True,
+                    'use_curl_cffi': True, 'curl_cffi_impersonate': impersonate
+                }, callback=self.parse_detail, errback=self.parse_detail_failed)
+                # yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True},
+                #                      callback=self.parse_detail, errback=self.parse_detail_failed)
 

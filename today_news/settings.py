@@ -69,7 +69,7 @@ DUPEFILTER_CLASS = 'scrapy.dupefilters.BaseDupeFilter'  # 什么都不过滤
 ENABLE_NEWS_TIME_FILTER = True
 NEWS_EXPIRE_DAYS = 1
 # 是否启用新闻url过滤
-ENABLE_NEWS_URL_FILTER = False
+ENABLE_NEWS_URL_FILTER = True
 
 # redis配置
 REDIS_URL = 'redis://:@127.0.0.1:6379/5'

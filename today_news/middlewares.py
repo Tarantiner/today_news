@@ -241,7 +241,7 @@ class PreRequestFilterMiddleware:
     # 定义不需要采集的URL模式
     DENY_PATTERNS = [
         # 目前真实找到的
-        '/tv-and-radio/', '/football/', '/commentisfree/', '/science/', '/books/', '/film/', '/environment/',
+        '/tv-and-radio/', '/football/', '/commentisfree/', '/books/', '/film/', '/environment/',
         '/lifeandstyle/', '/education/', '/culture/', '/thefilter-us/', '/money/', '/travel/', '/food/', '/stage/',
         '/fashion/', '/games/', '/artanddesign/', '/cities/', '/law/',
         '/inequality/', '/sport/', '/music/', '/media/', '/bulletin/', '/arts-entertainment/',
@@ -249,9 +249,9 @@ class PreRequestFilterMiddleware:
         '/fun/', '/cars/', '/esg/', '/local/', '/entertainment/', '/life/', '/sports/',
         '/health/', '/compilation/', '/生态/', '/运动天地/', '/homenews/', '/newsletters/', '/hilltv/',
         '/regulation/', '/senate/',
-        '/state-watch/', '/the-gavel/', '/energy-environment/', '/healthcare/',
+        '/state-watch/', '/the-gavel/', '/energy-environment/', '/hentertainmentealthcare/',
         '/nexstar_media_wire/', '/health-care/', '/house/',
-        '/congress-blog/',
+        '/congress-blog/', '/athletics?/',
         '/style/', '/climate/', '/weather/', '/deals/', '/lifestyle/', '/food-drink/', '/pop-culture/',
 
         # 娱乐类
@@ -312,6 +312,7 @@ class PreRequestFilterMiddleware:
 
             # 抛出异常，Scrapy会完全丢弃这个请求
             raise IgnoreRequest(f"URL filtered by deny patterns: {url}")
+        spider.logger.debug(f'合法的: {url}')
 
         # 返回None表示继续处理这个请求
         return None

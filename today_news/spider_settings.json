@@ -118,7 +118,7 @@
   },
   "赫芬顿邮报": {
     "py_name": "huffpost",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
@@ -385,6 +385,97 @@
     "domain": "www.bloomberg.com",
     "custom_settings": {
       "site_id": "3251878667875154516",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "韩国经济": {
+    "py_name": "hankyung",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.hankyung.com",
+    "custom_settings": {
+      "site_id": "8408579308726180508",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "时事社": {
+    "py_name": "jiji",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.jiji.com",
+    "custom_settings": {
+      "site_id": "2231951100615921910",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "TBS新闻": {
+    "py_name": "tbs",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "newsdig.tbs.co.jp",
+    "custom_settings": {
+      "site_id": "3646783849114456534",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "读卖新闻": {
+    "py_name": "yomiuri",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.yomiuri.co.jp",
+    "custom_settings": {
+      "site_id": "2877029031521860938",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "每日新闻": {
+    "py_name": "mainichi",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "mainichi.jp",
+    "custom_settings": {
+      "site_id": "6253998892545960303",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "产经新闻": {
+    "py_name": "sankei",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.sankei.com",
+    "custom_settings": {
+      "site_id": "5736838632784382088",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "越南通讯社": {
+    "py_name": "vietnamplus",
+    "enabled": true,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "zh.vietnamplus.vn",
+    "custom_settings": {
+      "site_id": "1867476046669680990",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }

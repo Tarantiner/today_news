@@ -14,6 +14,6 @@ def d(x):
 
 r = redis.from_url(REDIS_URL)
 try:
-    d('卫报')  # d('金融时报')  要删的爬虫名
+    d('产经新闻')  # d('金融时报')  要删的爬虫名
 finally:
     r.close()

@@ -5,7 +5,7 @@ from dateutil import parser
 
 class SpiderTxtParser:
     def clean_phrase(self, txt):
-        return txt.strip(' \r\n\t\xa0👉&nbsp\u200b')
+        return txt.strip(' \r\n\t\xa0👉&nbsp\u200b\u3000')
 
 
 class SpiderUtils:

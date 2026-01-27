@@ -469,13 +469,286 @@
   },
   "越南通讯社": {
     "py_name": "vietnamplus",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
     "domain": "zh.vietnamplus.vn",
     "custom_settings": {
       "site_id": "1867476046669680990",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "VTC新闻": {
+    "py_name": "vtcnews",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "vtcnews.vn",
+    "custom_settings": {
+      "site_id": "2014602276618853087",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "越南之声": {
+    "py_name": "vov",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "vov.vn",
+    "custom_settings": {
+      "site_id": "3453094249321749518",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "越南先锋报": {
+    "py_name": "dantri",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "dantri.com.vn",
+    "custom_settings": {
+      "site_id": "7445803837058271916",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "青年时代报": {
+    "py_name": "tuoitre",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "tuoitre.vn",
+    "custom_settings": {
+      "site_id": "2280628895101998993",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "人民报": {
+    "py_name": "nhandan",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "nhandan.vn",
+    "custom_settings": {
+      "site_id": "3566823076460333687",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "越南国家电视台": {
+    "py_name": "vtv",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "vtv.vn",
+    "custom_settings": {
+      "site_id": "3368682499240254239",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "Soha新闻": {
+    "py_name": "soha",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "soha.vn",
+    "custom_settings": {
+      "site_id": "3885581309679252421",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "Zing新闻": {
+    "py_name": "zing",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "znews.vn",
+    "custom_settings": {
+      "site_id": "6222814844767195642",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "青年报": {
+    "py_name": "thanhnien",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "thanhnien.vn",
+    "custom_settings": {
+      "site_id": "740892632341049733",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "今日日本": {
+    "py_name": "japantoday",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "japantoday.com",
+    "custom_settings": {
+      "site_id": "3541881561348329902",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "星岛头条": {
+    "py_name": "stheadline",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.stheadline.com",
+    "custom_settings": {
+      "site_id": "557301133876781049",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "破防网": {
+    "py_name": "breakingdefense",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "breakingdefense.com",
+    "custom_settings": {
+      "site_id": "1352117173327609056",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "人权观察网": {
+    "py_name": "hrw",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.hrw.org",
+    "custom_settings": {
+      "site_id": "2929888793707232066",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "自由时报电子报": {
+    "py_name": "ltn",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.ltn.com.tw",
+    "custom_settings": {
+      "site_id": "3543861215093076924",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "欧洲之声": {
+    "py_name": "sinoeurovoices",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "sinoeurovoices.com",
+    "custom_settings": {
+      "site_id": "4093980755831140584",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "国际西藏运动": {
+    "py_name": "savetibet",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "savetibet.org",
+    "custom_settings": {
+      "site_id": "4335471022959053058",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "外国资产控制办公室": {
+    "py_name": "treasury",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "ofac.treasury.gov",
+    "custom_settings": {
+      "site_id": "5637460922298076784",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "中国人权网": {
+    "py_name": "hrichina",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.hrichina.org",
+    "custom_settings": {
+      "site_id": "5773827781248240540",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "自由亚洲电台": {
+    "py_name": "rfa",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.rfa.org",
+    "custom_settings": {
+      "site_id": "6461985196008883836",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "美国之音中文网": {
+    "py_name": "voachinese",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.voachinese.com",
+    "custom_settings": {
+      "site_id": "6571467906349553664",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "国防安全研究院": {
+    "py_name": "indsr",
+    "enabled": true,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "indsr.org.tw",
+    "custom_settings": {
+      "site_id": "6775007869473155050",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }

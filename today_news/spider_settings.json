@@ -742,13 +742,26 @@
   },
   "国防安全研究院": {
     "py_name": "indsr",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
     "domain": "indsr.org.tw",
     "custom_settings": {
       "site_id": "6775007869473155050",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "联合早报": {
+    "py_name": "zaobao",
+    "enabled": true,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.zaobao.com",
+    "custom_settings": {
+      "site_id": "7566814858315698685",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }

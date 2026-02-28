@@ -10,6 +10,7 @@ from scrapy.pipelines.images import ImagesPipeline
 from scrapy.exceptions import DropItem
 from scrapy.utils.python import to_bytes
 import hashlib
+import hanzidentifier
 import traceback
 import pymysql
 import logging
@@ -86,6 +87,23 @@ class CleanPipeline:
                 print(f'处理了没语言{lang}', item['url'])
             except:
                 lang = ""
+
+        # 如果是 zh，则进一步区分简繁
+        if lang == 'zh' or lang == 'chi' or lang == '':
+            text = (item.get("title", "") + item.get("desc", "") + item.get("content", ""))[:1000]
+            if text.strip():
+                flag = hanzidentifier.identify(text)
+                if flag == hanzidentifier.SIMPLIFIED:
+                    lang = 'zh-cn'   # 简体
+                elif flag == hanzidentifier.TRADITIONAL:
+                    lang = 'zh-tw'   # 繁体
+                elif flag == hanzidentifier.MIXED:
+                    lang = 'zh'      # 混合 → 保持通用 zh
+                else:
+                    lang = 'zh'      # 无法判断或没有汉字
+            else:
+                lang = 'zh'
+
         item["lang"] = lang
 
         if 'is_origin' not in item:

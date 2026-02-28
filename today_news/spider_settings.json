@@ -755,13 +755,78 @@
   },
   "联合早报": {
     "py_name": "zaobao",
-    "enabled": true,
+    "enabled": false,
     "proxy": true,
     "selenium": false,
     "priority": 0,
     "domain": "www.zaobao.com",
     "custom_settings": {
       "site_id": "7566814858315698685",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "明报": {
+    "py_name": "mingpao",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www.mingpao.com",
+    "custom_settings": {
+      "site_id": "7011242902467947451",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "光明日报": {
+    "py_name": "guangming",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "guangming.com.my",
+    "custom_settings": {
+      "site_id": "667373736105876946",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "NHK WORLD": {
+    "py_name": "nhk_world",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "www3.nhk.or.jp/nhkworld/zh",
+    "custom_settings": {
+      "site_id": "1775894525234739178",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "联合国新闻": {
+    "py_name": "un_org",
+    "enabled": false,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "news.un.org/zh",
+    "custom_settings": {
+      "site_id": "1917877239359630709",
+      "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
+      "DOWNLOAD_DELAY": 1
+    }
+  },
+  "香港电台": {
+    "py_name": "rthk",
+    "enabled": true,
+    "proxy": true,
+    "selenium": false,
+    "priority": 0,
+    "domain": "news.rthk.hk",
+    "custom_settings": {
+      "site_id": "2242249458605882532",
       "CONCURRENT_REQUESTS_PER_DOMAIN": 1,
       "DOWNLOAD_DELAY": 1
     }

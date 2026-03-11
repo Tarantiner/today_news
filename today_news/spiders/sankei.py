@@ -45,7 +45,7 @@ class SankeiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm['content']:
             itm['content'] = 'content'
 
-        title = response.xpath('//title/text()').extract_first('')
+        title = response.xpath('//meta[@property="og:title"]/@content').extract_first('').strip('')
         if title:
             itm['title'] = title
 

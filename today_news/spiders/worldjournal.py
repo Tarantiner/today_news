@@ -55,7 +55,7 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         d1 = response.xpath('//section[@class="article-content__editor"]')
-        clean_text = d1.xpath('.//p[not(ancestor::section[@class="next-page"])]').xpath('string(.)')
+        clean_text = d1.xpath('.//p[not(ancestor::section[@class="next-page"]) and not(ancestor::div[@class="further-reading"])]').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)

@@ -24,36 +24,41 @@ class WashingtonPostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             )
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@data-qa="article-body"]')
-        clean_text = d1.xpath('.//p[@data-contentid]').xpath('string(.)')
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                # print([_p])
-                txt_list.append(_p)
+        try:
+            data = response.json()
+        except:
+            self.logger.error(f'解析json失败:|{response.url}')
+            return
+
         itm = response.meta['item']
-        # print('\n'.join(txt_list))
+
+        desc = (data.get('description') or {}).get('basic') or ''
+        if desc:
+            itm['desc'] = desc
+
+        txt_list = []
+        for ii in data.get('content_elements') or []:
+            if ii.get('type') in ('header', 'text'):
+                _p = ii.get('content') or ''
+                if _p:
+                    # print([_p])
+                    txt_list.append(remove_tags(_p))
         itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
             itm['content'] = 'content'
 
-        desc = response.xpath('//meta[@name="description"]/@content').extract_first('')
-        if desc:
-            itm['desc'] = desc
-
-        if not itm.get('images'):
-            img_url = response.xpath('//meta[@property="og:image"]/@content').extract_first('')
-            if img_url:
-                img_caption = ''
-                img_time = ''
-                images = [
-                    {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-                ]
-                images = images
-            else:
-                images = []
-            itm['images'] = images
+        # if not itm.get('images'):
+        #     img_url = response.xpath('//meta[@property="og:image"]/@content').extract_first('')
+        #     if img_url:
+        #         img_caption = ''
+        #         img_time = ''
+        #         images = [
+        #             {'url': img_url, 'caption': img_caption, 'img_time': img_time}
+        #         ]
+        #         images = images
+        #     else:
+        #         images = []
+        #     itm['images'] = images
 
         yield itm
 
@@ -65,6 +70,13 @@ class WashingtonPostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #     yield failure.request.meta['item']
 
     def parse(self, response):
+        full_news_url = 'https://www.washingtonpost.com/arc/prism/api/prism-content-api'
+        headers = {
+            'Sec-Fetch-Dest': 'empty',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Site': 'same-origin',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36 Edg/145.0.0.0',
+        }
         if response.request.url == self.start_urls[0]:
             response.selector.remove_namespaces()
             for itm in response.xpath('//url'):
@@ -106,5 +118,7 @@ class WashingtonPostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     images=images,
                 )
                 # yield itm
-                yield scrapy.Request(url, meta={'snapshot': True, 'item': itm, 'detail': True, 'use_curl_cffi': True},
+                url_path = parse.urlparse(url).path
+                web_url = full_news_url + '?_website=washpost&query={"canonical_url":"' + url_path + '"}'
+                yield scrapy.Request(web_url, meta={'snapshot': True, 'item': itm, 'detail': True}, headers=headers,
                                      callback=self.parse_detail, errback=self.parse_detail_failed)

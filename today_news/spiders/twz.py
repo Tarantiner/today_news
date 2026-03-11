@@ -16,7 +16,7 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         itm = response.meta['item']
-        pub_time = self.to_utc_string(response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
         if not pub_time:
             return
         # 检查过期资讯并过滤
@@ -64,10 +64,10 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
-        pub_time = self.to_utc_string(response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
         if pub_time:
             itm['pub_time'] = pub_time
-        mod_time = self.to_utc_string(response.xpath('//meta[@name="article:modified_time"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(self.name, response.xpath('//meta[@name="article:modified_time"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -91,7 +91,7 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url).path)
             if not title:
                 continue
-            mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+            mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(mod_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):

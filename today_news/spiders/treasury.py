@@ -79,7 +79,7 @@ class TreasurySpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if not title:
                 continue
 
-            pub_time = self.to_utc_string(itm.xpath('./div[2]/div/text()').extract_first('').strip(' -   \n').strip())
+            pub_time = self.to_utc_string(self.name, itm.xpath('./div[2]/div/text()').extract_first('').strip(' -   \n').strip())
             if not pub_time:
                 continue
             # 检查过期资讯并过滤

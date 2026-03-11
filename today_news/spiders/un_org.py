@@ -35,7 +35,7 @@ class UNOrgSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         itm = response.meta['item']
-        pub_time = self.to_utc_string(response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
         if not pub_time:
             return
         # 检查过期资讯并过滤
@@ -44,7 +44,7 @@ class UNOrgSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             self.logger.info(f'新闻过期：{pub_time}|{response.url}')
             return
         itm['pub_time'] = pub_time
-        mod_time = self.to_utc_string(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(self.name, response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -96,7 +96,7 @@ class UNOrgSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 itm.xpath('.//h2[@class="node__title"]/a/span/text()').extract_first(''))
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('.//div[@class="node__meta"]//time[@class="datetime"]/@datetime').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('.//div[@class="node__meta"]//time[@class="datetime"]/@datetime').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):
@@ -172,7 +172,7 @@ class UNOrgSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 continue
 
             try:
-                pub_time = self.to_utc_string(itm.xpath('./h2/a/small[@class="datetime"]/script').extract_first('').split('\'')[1])
+                pub_time = self.to_utc_string(self.name, itm.xpath('./h2/a/small[@class="datetime"]/script').extract_first('').split('\'')[1])
             except:
                 continue
             # 检查过期资讯并过滤

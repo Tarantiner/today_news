@@ -61,7 +61,7 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
-        mod_time = self.to_utc_string(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(self.name, response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -85,7 +85,7 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = self.clean_txt(itm.xpath('./news/title/text()').extract_first(''))
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
             if not pub_time:
                 continue
             # 检查过期资讯并过滤

@@ -70,7 +70,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             except:
                 pass
 
-        mod_time = self.to_utc_string(response.xpath('//meta[@name="dcterms.modified"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(self.name, response.xpath('//meta[@name="dcterms.modified"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -95,7 +95,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤

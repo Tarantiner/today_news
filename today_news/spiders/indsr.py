@@ -62,7 +62,7 @@ class IndsrSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if not title:
                 continue
 
-            pub_time = self.to_utc_string(itm.xpath('.//p[contains(@class, "time1")]').xpath('string(.)').extract_first('').strip())
+            pub_time = self.to_utc_string(self.name, itm.xpath('.//p[contains(@class, "time1")]').xpath('string(.)').extract_first('').strip())
             if not pub_time:
                 continue
             # 检查过期资讯并过滤

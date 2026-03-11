@@ -42,7 +42,7 @@ class MainichiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             self.logger.info(f'内容为付费：{response.url}')
             return
         try:
-            pub_time = self.to_utc_string(response.xpath('//meta[@name="firstcreate"]/@content').extract_first(''))
+            pub_time = self.to_utc_string(self.name, response.xpath('//meta[@name="firstcreate"]/@content').extract_first(''))
         except:
             self.logger.info(f'提取发布时间失败：{response.url}')
             return
@@ -77,7 +77,7 @@ class MainichiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['source'] = ''
 
         try:
-            itm['mod_time'] = self.to_utc_string(response.xpath('//meta[@name="lastupdate"]/@content').extract_first(''))
+            itm['mod_time'] = self.to_utc_string(self.name, response.xpath('//meta[@name="lastupdate"]/@content').extract_first(''))
         except:
             itm['mod_time'] = ''
 
@@ -110,7 +110,7 @@ class MainichiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 itm.xpath('./a//node()[contains(@class,"articlelist-title")]/text()').extract_first(''))
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('./a//span[contains(@class, "articletag-date")]/text()').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('./a//span[contains(@class, "articletag-date")]/text()').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):

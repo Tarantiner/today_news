@@ -24,7 +24,7 @@ class TheDefensePostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = data.get('name') or ''
             if not title:
                 return
-            pub_time = self.to_utc_string(data.get('datePublished') or '')
+            pub_time = self.to_utc_string(self.name, data.get('datePublished') or '')
             if not pub_time:
                 return
             # 检查过期资讯并过滤
@@ -34,7 +34,7 @@ class TheDefensePostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             content = data.get('articleBody').strip('\n ').replace('\n\n\n\n', '\n')
             if not content:
                 return
-            mod_time = self.to_utc_string(data.get('dateModified') or '')
+            mod_time = self.to_utc_string(self.name, data.get('dateModified') or '')
             desc = data.get('description') or ''
             keywords = data.get('keywords') or ''
             publisher = (data.get('publisher') or {}).get('name') or ''
@@ -98,7 +98,7 @@ class TheDefensePostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #         title = itm.xpath('./news/title/text()').extract_first('')
         #         if not title:
         #             continue
-        #         pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
+        #         pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
         #         if not pub_time:
         #             continue
         #         # 检查过期资讯并过滤
@@ -106,7 +106,7 @@ class TheDefensePostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #             self.logger.info(f'新闻过期：{pub_time}|{url}')
         #             continue
         #
-        #         mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+        #         mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
         #         desc = ''
         #         lang = itm.xpath('./news/publication/language/text()').extract_first('')
         #         content = ''

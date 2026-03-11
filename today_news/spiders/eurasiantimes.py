@@ -16,7 +16,7 @@ class EurasiantimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         itm = response.meta['item']
-        pub_time = self.to_utc_string(response.xpath('//meta[@name="article:published_time"] | //meta[@property="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@name="article:published_time"] | //meta[@property="article:published_time"]/@content').extract_first(''))
         if not pub_time:
             return
         # 检查过期资讯并过滤
@@ -68,7 +68,7 @@ class EurasiantimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url.rstrip('/')).path)
             if not title:
                 continue
-            mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+            mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(mod_time, self.settings.get('NEWS_EXPIRE_DAYS')):
                 self.logger.info(f'新闻过期：{mod_time}|{url}')

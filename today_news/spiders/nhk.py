@@ -53,7 +53,7 @@ class NHKSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.get('title') or ''
                 if not title:
                     continue
-                pub_time = self.to_utc_string(itm.get('updated_at') or '')
+                pub_time = self.to_utc_string(self.name, itm.get('updated_at') or '')
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤

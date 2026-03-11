@@ -21,7 +21,7 @@ class VtvSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     def parse_detail(self, response):
         itm = response.meta['item']
         try:
-            pub_time = self.to_utc_string(re.search('"datePublished": ?"(.*?)"', response.text).group(1))
+            pub_time = self.to_utc_string(self.name, re.search('"datePublished": ?"(.*?)"', response.text).group(1))
         except:
             return
         if not pub_time:
@@ -49,7 +49,7 @@ class VtvSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
         try:
             mod_time = re.search('"dateModified" ?: ?"(.*?)"', response.text).group(1)
-            mod_time = self.to_utc_string(mod_time)
+            mod_time = self.to_utc_string(self.name, mod_time)
             if mod_time:
                 itm['mod_time'] = mod_time
         except:

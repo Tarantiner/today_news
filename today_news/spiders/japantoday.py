@@ -83,7 +83,7 @@ class JapanTodaySpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 itm.xpath('.//h3[contains(@class, "media-heading")]/a/@title').extract_first(''))
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('.//time[@itemprop="datePublished"]/@datetime').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('.//time[@itemprop="datePublished"]/@datetime').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):
@@ -92,7 +92,7 @@ class JapanTodaySpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     should_continue = False
                 continue
 
-            mod_time = self.to_utc_string(itm.xpath('.//time[@itemprop="dateModified"]/@datetime').extract_first(''))
+            mod_time = self.to_utc_string(self.name, itm.xpath('.//time[@itemprop="dateModified"]/@datetime').extract_first(''))
             desc = ''
             lang = ''
             content = ''

@@ -80,7 +80,7 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['source'] = ''
 
         try:
-            mod_time = self.to_utc_string(re.search('dateModified": ?"(.*?)"', response.text).group(1))
+            mod_time = self.to_utc_string(self.name, re.search('dateModified": ?"(.*?)"', response.text).group(1))
             if mod_time:
                 itm['mod_time'] = mod_time
         except:
@@ -113,7 +113,9 @@ class TwzSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = self.clean_phrase(itm.xpath('./a//node()[contains(@class,"article-content__title")]/text()').extract_first(''))
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('./a//time[@class="c-date"]/@datetime').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('./a//time[@class="c-date"]/@datetime').extract_first(''))
+            if not pub_time:
+                continue
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):

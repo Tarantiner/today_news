@@ -20,7 +20,7 @@ class ZaobaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     def parse_detail(self, response):
         itm = response.meta['item']
         try:
-            pub_time = self.to_utc_string(re.search('"datePublished": ?"(.*?)"', response.text).group(1))
+            pub_time = self.to_utc_string(self.name, re.search('"datePublished": ?"(.*?)"', response.text).group(1))
         except:
             return
         if not pub_time:
@@ -47,7 +47,7 @@ class ZaobaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
         try:
             mod_time = re.search('"dateModified" ?: ?"(.*?)"', response.text).group(1)
-            mod_time = self.to_utc_string(mod_time)
+            mod_time = self.to_utc_string(self.name, mod_time)
             if mod_time:
                 itm['mod_time'] = mod_time
         except:
@@ -97,7 +97,7 @@ class ZaobaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if not title:
                 continue
 
-            pub_time = self.to_utc_string(itm.xpath('./span/text()').extract_first('').strip())
+            pub_time = self.to_utc_string(self.name, itm.xpath('./span/text()').extract_first('').strip())
             if not pub_time:
                 continue
             # _time = url.split('/')[-1].replace('story', '').split('-')[0]

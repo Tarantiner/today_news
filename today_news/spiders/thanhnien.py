@@ -36,7 +36,7 @@ class ThanhnienSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
         try:
             mod_time = re.search('"dateModified" ?: ?"(.*?)"', response.text).group(1)
-            mod_time = self.to_utc_string(mod_time)
+            mod_time = self.to_utc_string(self.name, mod_time)
             if mod_time:
                 itm['mod_time'] = mod_time
         except:
@@ -66,7 +66,7 @@ class ThanhnienSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = itm.xpath('./news/title/text()').extract_first('')
                 if not title:
                     continue
-                pub_time = self.to_utc_string(itm.xpath('./news/publication_date/text()').extract_first(''))
+                pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
                 if not pub_time:
                     continue
                 # 检查过期资讯并过滤

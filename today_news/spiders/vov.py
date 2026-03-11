@@ -32,7 +32,7 @@ class VovSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url).path)
             if not title:
                 continue
-            mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+            mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
             # 检查过期资讯并过滤
             if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(mod_time, self.settings.get(
                     'NEWS_EXPIRE_DAYS')):
@@ -78,7 +78,7 @@ class VovSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     def parse_detail(self, response):
         itm = response.meta['item']
         try:
-            pub_time = self.to_utc_string(re.search('"datePublished": ?"(.*?)"', response.text).group(1))
+            pub_time = self.to_utc_string(self.name, re.search('"datePublished": ?"(.*?)"', response.text).group(1))
         except:
             return
         if not pub_time:

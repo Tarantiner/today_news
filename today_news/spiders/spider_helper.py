@@ -130,14 +130,14 @@ class SpiderUtils:
             dt = dt.astimezone(timezone.utc)
         return dt
 
-    def to_utc_string(self, time_str):
+    def to_utc_string(self, spider_name='', time_str=''):
         """转换为UTC时间字符串"""
         dt = self.parse_time(time_str)
         if dt:
             utc_time_str = dt.strftime('%Y-%m-%d %H:%M:%S')
             # print(f'{time_str:45} -> {utc_time_str}')
             return utc_time_str
-        print(f'提取时间失败：【{time_str}】')
+        print(f'{spider_name} 提取时间失败：【{time_str}】')
         return ''
 
     def match_invalid_url(self, url):

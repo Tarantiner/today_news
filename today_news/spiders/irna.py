@@ -90,10 +90,10 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if desc:
             itm['desc'] = desc
 
-        pub_time = self.to_utc_string(response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@property="article:published_time"]/@content').extract_first(''))
         if pub_time:
             itm['pub_time'] = pub_time
-        mod_time = self.to_utc_string(response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
+        mod_time = self.to_utc_string(self.name, response.xpath('//meta[@property="article:modified_time"]/@content').extract_first(''))
         if mod_time:
             itm['mod_time'] = mod_time
 
@@ -120,7 +120,7 @@ class IrnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             title = os.path.basename(parse.urlparse(url).path)
             if not title:
                 continue
-            pub_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+            pub_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
             if not pub_time:
                 continue
             # 检查过期资讯并过滤

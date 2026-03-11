@@ -91,7 +91,7 @@ class VietnamplusSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 title = self.clean_phrase(itm.get('title') or '')
                 if not title:
                     continue
-                pub_time = self.to_utc_string(itm.get('date'))
+                pub_time = self.to_utc_string(self.name, itm.get('date'))
                 # 检查过期资讯并过滤
                 if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get(
                         'NEWS_EXPIRE_DAYS')):
@@ -100,7 +100,7 @@ class VietnamplusSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                         should_continue = False
                     continue
 
-                mod_time = self.to_utc_string(itm.get('update_time'))
+                mod_time = self.to_utc_string(self.name, itm.get('update_time'))
                 desc = remove_tags(itm.get('description') or '')
                 lang = ''
                 content = ''

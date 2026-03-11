@@ -21,7 +21,7 @@ class SankeiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail(self, response):
         itm = response.meta['item']
-        pub_time = self.to_utc_string(response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
+        pub_time = self.to_utc_string(self.name, response.xpath('//meta[@name="article:published_time"]/@content').extract_first(''))
         if not pub_time:
             return
         # 检查过期资讯并过滤
@@ -93,7 +93,7 @@ class SankeiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     continue
                 if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                     continue
-                mod_time = self.to_utc_string(itm.xpath('./lastmod/text()').extract_first(''))
+                mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
                 if not mod_time:
                     continue
                 # 检查过期资讯并过滤

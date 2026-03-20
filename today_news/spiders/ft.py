@@ -15,13 +15,19 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     start_urls = ["https://www.ft.com/sitemaps/news.xml"]
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
-        clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
+        if 'Register to unlock this article' in response.text or 'Subscribe to unlock this article' in response.text:
+            print('目标url需要注册订阅', response.url)
+            return
+        # d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
+        # clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
+        d1 = response.xpath('//article[@id="article-body"]')
+        # clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
+        clean_text = d1.xpath('.//p').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                # print([_p])
+                print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
         # print('\n'.join(txt_list))

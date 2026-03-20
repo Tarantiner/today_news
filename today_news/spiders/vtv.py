@@ -79,7 +79,7 @@ class VtvSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #     yield failure.request.meta['item']
 
     def parse(self, response):
-        for itm in response.xpath('//div[@class="box-category-item"]'):
+        for itm in response.xpath('//article[@class="box-category-item"]'):
             url = itm.xpath('.//a[@data-type="title"]/@href').extract_first('')
             if not url:
                 continue

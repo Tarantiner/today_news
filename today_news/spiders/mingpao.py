@@ -102,7 +102,7 @@ class MingpaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if img_list:
                 img_url = img_list[0].xpath('./@href').extract_first('')
                 if not img_url.startswith('http'):
-                    url = parse.urljoin('https://news.mingpao.com', img_url)
+                    img_url = parse.urljoin('https://news.mingpao.com', img_url)
                 img_caption = img_list[0].xpath('./@title').extract_first('')
                 img_time = ''
                 images = [

@@ -97,17 +97,8 @@ class ZaobaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             if not title:
                 continue
 
-            pub_time = self.to_utc_string(self.name, itm.xpath('./span/text()').extract_first('').strip())
-            if not pub_time:
-                continue
-            # _time = url.split('/')[-1].replace('story', '').split('-')[0]
-        
-            # 检查过期资讯并过滤
-            if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
-                self.logger.info(f'新闻过期：{pub_time}|{url}')
-                continue
-
             images = []
+            pub_time = ''
             mod_time = ''
             desc = ''
             lang = ''

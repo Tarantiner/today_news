@@ -19,7 +19,7 @@ class PoliticoComSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     ]
     IMPERSONATE_LIST = [
         # "chrome110",
-        "chrome110",
+        "chrome120",
     ]
 
     async def start(self):

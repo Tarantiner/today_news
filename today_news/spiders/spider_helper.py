@@ -167,7 +167,9 @@ class SpiderUtils:
         # print(f"一天前边界: {one_day_ago}")
         # print(f"是否在一天前: {beijing_time < one_day_ago}")
 
-        return beijing_time < days_ago
+        if beijing_time < days_ago or beijing_time > current_time:
+            return True
+        return False
 
 if __name__ == '__main__':
     # 使用示例

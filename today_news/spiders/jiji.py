@@ -43,6 +43,8 @@ class JijiSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             img_list = response.xpath('//div[@class="ArticleFigureWrapper"]/figure//img')
             if img_list:
                 img_url = img_list[0].xpath('./@src').extract_first('')
+                if not img_url.startswith('http'):
+                    img_url = parse.urljoin('https://www.jiji.com', img_url)
                 img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [

@@ -24,7 +24,16 @@ class NHKWorldSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                            'articleBody']
             itm['content'] = content.replace('. ', '.\n').replace('  ', '\n')
         except:
-            itm['content'] = ''
+            # 部分网站JSON里没有正文，如https://www3.nhk.or.jp/nhkworld/zh/news/20260319_N02/
+            d1 = response.xpath('//div[@class="p-article__body"]')
+            txt_list = []
+            for p in d1.xpath('./p/text()').extract():
+                _p = self.clean_phrase(p)
+                if _p:
+                    # print([_p])
+                    txt_list.append(_p)
+            # print('\n'.join(txt_list))
+            itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
             itm['content'] = 'content'
 

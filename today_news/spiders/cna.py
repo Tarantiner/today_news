@@ -8,7 +8,7 @@ from today_news.middlewares import DupeFiltered
 
 class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "中央通讯社"
-    allowed_domains = ["cna.com.tw"]
+    # allowed_domains = ["cna.com.tw"]
     start_urls = [
         # "https://www.cna.com.tw/atomfeed_cfp.xml",  # 没有发布时间，不采集
         "https://www.cna.com.tw/googlenewssitemap_fromremote_cfp.xml",
@@ -51,9 +51,10 @@ class CnaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['desc'] = response.xpath('//meta[@name="description"]/@content').extract_first('')
 
         if not itm.get('images'):
-            img_url = response.xpath('//div[@class="centralContent"]/div[@class="fullPic"]//picture/img/@src').extract_first('')
-            if img_url:
-                img_caption = response.xpath('//div[@class="centralContent"]/div[@class="fullPic"]//picture/img/@alt').extract_first('')
+            img_list = response.xpath('//meta[@property="og:image"]')
+            if img_list:
+                img_url = img_list[0].xpath('./@content').extract_first('')
+                img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}

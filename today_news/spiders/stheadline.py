@@ -12,7 +12,7 @@ from today_news.middlewares import DupeFiltered
 
 class StheadlineSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "星岛头条"
-    allowed_domains = ["stheadline.com"]
+    # allowed_domains = ["stheadline.com"]
     start_urls = ["https://www.stheadline.com/sitemap-index.xml"]
 
     def clean_txt(self, txt):

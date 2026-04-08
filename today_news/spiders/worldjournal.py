@@ -9,7 +9,7 @@ from today_news.middlewares import DupeFiltered
 
 class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "世界新闻网"
-    allowed_domains = ["worldjournal.com"]
+    # allowed_domains = ["worldjournal.com"]
     start_urls = ["https://www.worldjournal.com/sitemap/gnews"]
 
     def match_invalid_url(self, url):
@@ -76,7 +76,7 @@ class WorldjournalSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             img_list = response.xpath(
                 '//figure[@class="article-content__image"]/picture/img')
             if img_list:
-                img_url = img_list[0].xpath('./@src').extract_first('')
+                img_url = img_list[0].xpath('./@data-src').extract_first('')
                 img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [

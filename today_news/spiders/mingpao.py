@@ -98,12 +98,10 @@ class MingpaoSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 self.logger.info(f'新闻过期：{pub_time}|{url}')
                 continue
 
-            img_list = itm.xpath('./figure/div[contains(@class, "imgLiquidNoFill")]/a')
+            img_list = itm.xpath('./figure/div[contains(@class, "imgLiquidNoFill")]/a/img')
             if img_list:
-                img_url = img_list[0].xpath('./@href').extract_first('')
-                if not img_url.startswith('http'):
-                    img_url = parse.urljoin('https://news.mingpao.com', img_url)
-                img_caption = img_list[0].xpath('./@title').extract_first('')
+                img_url = img_list[0].xpath('./@data-original').extract_first('')
+                img_caption = img_list[0].xpath('./@alt').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}

@@ -11,7 +11,7 @@ from today_news.middlewares import DupeFiltered
 # 该网站需要订阅，不做
 class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "金融时报"
-    allowed_domains = ["ft.com"]
+    # allowed_domains = ["ft.com"]
     start_urls = ["https://www.ft.com/sitemaps/news.xml"]
 
     def parse_detail(self, response):
@@ -20,7 +20,8 @@ class FtSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             return
         # d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
         # clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
-        d1 = response.xpath('//article[@id="article-body"]')
+        # d1 = response.xpath('//article[@id="article-body"]')
+        d1 = response.xpath('//div[@class="article__content"]//article')
         # clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
         clean_text = d1.xpath('.//p').xpath('string(.)')
         txt_list = []

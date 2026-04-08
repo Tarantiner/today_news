@@ -10,7 +10,7 @@ from today_news.middlewares import DupeFiltered
 
 class NbcNewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "NBC新闻"
-    allowed_domains = ["nbcnews.com"]
+    # allowed_domains = ["nbcnews.com"]
     start_urls = ["https://www.nbcnews.com/sitemap/nbcnews/sitemap-news"]
 
     def parse_detail(self, response):

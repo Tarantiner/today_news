@@ -12,7 +12,7 @@ from today_news.middlewares import DupeFiltered
 
 class SohaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "Soha新闻"
-    allowed_domains = ["soha.vn"]
+    # allowed_domains = ["soha.vn"]
     start_urls = ["https://soha.vn/google-news-sitemap.xml"]
 
     def parse_detail(self, response):

@@ -12,7 +12,7 @@ from today_news.middlewares import DupeFiltered
 
 class WashingtonPostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
     name = "华盛顿邮报"
-    allowed_domains = ["washingtonpost.com"]
+    # allowed_domains = ["washingtonpost.com"]
     start_urls = ["https://www.washingtonpost.com/sitemaps/news-sitemap.xml.gz"]
 
     async def start(self):
@@ -37,28 +37,29 @@ class WashingtonPostSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['desc'] = desc
 
         txt_list = []
+        _url = ''
         for ii in data.get('content_elements') or []:
             if ii.get('type') in ('header', 'text'):
                 _p = ii.get('content') or ''
                 if _p:
                     # print([_p])
                     txt_list.append(remove_tags(_p))
+            elif ii.get('type') == 'image' and ii.get('url'):
+                _url = ii.get('url')
+
         itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
             itm['content'] = 'content'
 
-        # if not itm.get('images'):
-        #     img_url = response.xpath('//meta[@property="og:image"]/@content').extract_first('')
-        #     if img_url:
-        #         img_caption = ''
-        #         img_time = ''
-        #         images = [
-        #             {'url': img_url, 'caption': img_caption, 'img_time': img_time}
-        #         ]
-        #         images = images
-        #     else:
-        #         images = []
-        #     itm['images'] = images
+        if not itm.get('images'):
+            if _url:
+                images = [
+                    {'url': _url, 'caption': '', 'img_time': ''}
+                ]
+                images = images
+            else:
+                images = []
+            itm['images'] = images
 
         yield itm
 

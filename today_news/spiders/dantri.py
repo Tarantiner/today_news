@@ -21,8 +21,8 @@ class DantriSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         return True
 
     def parse_detail(self, response):
-        d1 = response.xpath('//article[@class="singular-container"]')
-        clean_text = d1.xpath('.//div[@class="singular-content"]//p').xpath('string(.)')
+        d1 = response.xpath('//div[@id="desktop-in-article"]')
+        clean_text = d1.xpath('.//p').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)

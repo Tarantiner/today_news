@@ -34,6 +34,6 @@ class CompletedFileFeedStorage(FileFeedStorage):
         file.close()
         # 重命名为最终的 .completed 文件
         target_dir, target_name = os.path.split(self.path)
-        new_path = os.path.join(target_dir, '--'.join([self.site_id, target_name]))
+        new_path = os.path.join(target_dir, '--'.join(['news', self.site_id, target_name]))
         if os.path.exists(self.temp_path):
             os.rename(self.temp_path, new_path)

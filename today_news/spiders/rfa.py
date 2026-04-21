@@ -3,7 +3,7 @@ import json
 import scrapy
 import datetime
 import traceback
-from lxml import etree
+from parsel import Selector
 from urllib import parse
 from datetime import datetime, date, timedelta
 import calendar
@@ -57,10 +57,9 @@ class RfaSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                 continue
 
             txt = itm.xpath('./encoded/text()').extract_first('')
-            tree = etree.HTML(txt)
+            tree = Selector(text=txt)
             txt_list = []
-            for p in tree.xpath('//p'):
-                _p = p.text
+            for _p in tree.xpath('//p/text()').extract():
                 if _p:
                     # print([_p])
                     txt_list.append(_p)

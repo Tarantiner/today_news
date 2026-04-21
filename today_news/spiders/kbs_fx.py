@@ -1,49 +1,26 @@
-import re
-import json
 import scrapy
-import gzip
 import datetime
-import traceback
-from urllib import parse
-from scrapy.http import HtmlResponse
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
 from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class VoachineseSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "美国之音中文网"
-    allowed_domains = ["voachinese.com"]
-    start_urls = ["https://www.voachinese.com/sitemap.xml"]
-
-    async def start(self):
-        yield scrapy.Request(
-            self.start_urls[0],
-            callback=self.parse_sitemap,
-        )
-
-    def parse_sitemap(self, response):
-        if response.request.url == self.start_urls[0]:
-            response.selector.remove_namespaces()
-            for itm in response.xpath('//sitemap'):
-                url = itm.xpath('./loc/text()').extract_first('')
-                if url.endswith('news.xml.gz'):
-                    yield scrapy.Request(
-                        url,
-                        callback=self.parse,
-                    )
+class KbsFxSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "KBS新闻"
+    allowed_domains = ["kbs.co.kr"]
+    start_urls = ["https://news.kbs.co.kr/sitemap/recentNewsList.xml"]
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@id="article-content"]')
-        clean_text = d1.xpath('./div[@class="wsw"]/p').xpath('string(.)')
+        itm = response.meta['item']
+
+        clean_text = response.xpath('//*[@id="cont_newstext"]/text()')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                print([_p])
+                # print([_p])
                 txt_list.append(_p)
-        itm = response.meta['item']
         # print('\n'.join(txt_list))
         itm['content'] = '\n'.join(txt_list)
         if not itm['content']:
@@ -53,19 +30,11 @@ class VoachineseSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if desc:
             itm['desc'] = desc
 
-        try:
-            mod_time = re.search('"dateModified" ?: ?"(.*?)"', response.text).group(1)
-            mod_time = self.to_utc_string(self.name, mod_time)
-            if mod_time:
-                itm['mod_time'] = mod_time
-        except:
-            pass
-
         if not itm.get('images'):
             img_list = response.xpath('//meta[@property="og:image"]')
             if img_list:
-                img_url = img_list[0].xpath('./@content').extract_first('')
-                img_caption = img_list[0].xpath('./@alt').extract_first('')
+                img_url = response.urljoin(img_list[0].xpath('./@content').extract_first(''))
+                img_caption = img_list[0].xpath('//meta[@property="og:image"]/@content').extract_first('')
                 img_time = ''
                 images = [
                     {'url': img_url, 'caption': img_caption, 'img_time': img_time}
@@ -78,9 +47,6 @@ class VoachineseSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         if not itm.get('keywords'):
             itm['keywords'] = response.xpath('//meta[@name="keywords"]/@content').extract_first('')
 
-        if not itm['content'] and itm['desc']:
-            itm['content'] = itm['desc']
-
         yield itm
 
     def parse_detail_failed(self, failure):
@@ -91,35 +57,23 @@ class VoachineseSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         #     yield failure.request.meta['item']
 
     def parse(self, response):
-        decompressed_data = gzip.decompress(response.body)
-        text = decompressed_data.decode('utf-8')
-
-        new_response = HtmlResponse(
-            url=response.url,
-            body=text.encode('utf-8'),
-            encoding='utf-8',
-            request=response.request
-        )
-
-        new_response.selector.remove_namespaces()
-        for itm in new_response.xpath('//url'):
-            url = itm.xpath('./loc/text()').extract_first('')
+        response.selector.remove_namespaces()
+        for itm in response.xpath('//url'):
+            url = response.urljoin(itm.xpath('./loc/text()').extract_first(''))
             if not url:
                 continue
             if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                 continue
             title = itm.xpath('./news/title/text()').extract_first('')
-            if not title:
-                continue
-            pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
+            pub_time = self.to_utc_string(self.name,itm.xpath('./news/publication_date/text()').extract_first(''))
             if not pub_time:
                 continue
             # 检查过期资讯并过滤
-            # if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
-            #     self.logger.info(f'新闻过期：{pub_time}|{url}')
-            #     continue
+            if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
+                self.logger.info(f'新闻过期：{pub_time}|{url}')
+                continue
 
-            mod_time = ''
+            mod_time = self.to_utc_string(self.name,itm.xpath('./lastmod/text()').extract_first(''))
             desc = ''
             lang = itm.xpath('./news/publication/language/text()').extract_first('')
             content = ''

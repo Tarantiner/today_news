@@ -11,10 +11,10 @@ import random
 import hashlib
 from urllib import parse
 from scrapy.http import HtmlResponse
-from selenium import webdriver
+# from selenium import webdriver
 from scrapy.exceptions import IgnoreRequest
 from scrapy.downloadermiddlewares.retry import RetryMiddleware
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 from scrapy import signals
 from scrapy.utils.python import to_bytes
 

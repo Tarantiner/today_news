@@ -10,19 +10,41 @@ from today_news.items import TodayNewsItem
 from today_news.middlewares import DupeFiltered
 
 
-class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
-    name = "美联社"
-    allowed_domains = ["apnews.com"]
-    start_urls = ["https://apnews.com/news-sitemap-content.xml"]
+class TaipeiTimesSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
+    name = "台北时报"
+    # allowed_domains = ["taipeitimes.com"]
+    start_urls = ["https://www.taipeitimes.com/sitemap/sitemap.xml"]
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[contains(@class, "RichTextBody")]')
-        clean_text = d1.xpath('.//p[not(ancestor::div[@class="Infobox"])]').xpath('string(.)')
+        itm = response.meta['item']
+        try:
+            mod_time = re.search('"dateModified" ?: ?"(.*?)"', response.text).group(1)
+            mod_time = self.to_utc_string(self.name, mod_time)
+            if mod_time:
+                itm['mod_time'] = mod_time
+        except:
+            return
+        pub_time = mod_time
+        if not pub_time:
+            return
+        # 检查过期资讯并过滤
+        if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
+            self.logger.info(f'新闻过期：{pub_time}|{response.url}')
+            return
+        itm['pub_time'] = pub_time
+
+        title = response.xpath('//div[@class="archives"]/h1/text()').extract_first('')
+        if not title:
+            return
+        itm['title'] = title
+
+        d1 = response.xpath('//div[@class="archives"]')
+        clean_text = d1.xpath('./p').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)
             if _p:
-                # print([_p])
+                print([_p])
                 txt_list.append(_p)
         itm = response.meta['item']
         # print('\n'.join(txt_list))
@@ -35,7 +57,7 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['desc'] = desc
 
         if not itm.get('images'):
-            img_list = response.xpath('//picture[contains(@data-crop, "crop")]//img')
+            img_list = response.xpath('//div[@class="imgboxa"]//img')
             if img_list:
                 img_url = img_list[0].xpath('./@src').extract_first('')
                 img_caption = img_list[0].xpath('./@alt').extract_first('')
@@ -69,22 +91,24 @@ class ApnewsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
                     continue
                 if self.settings.get('ENABLE_NEWS_URL_FILTER') and self.match_invalid_url(url):
                     continue
-                title = itm.xpath('./news/title/text()').extract_first('')
-                if not title:
+                try:
+                    temp_pub_time = re.search(r'.*?/archives/(\d+/\d+/\d+)', url).group(1).replace('/', '-') + ' 00:00:00'
+                except:
                     continue
-                pub_time = self.to_utc_string(self.name, itm.xpath('./news/publication_date/text()').extract_first(''))
-                if not pub_time:
+                if not temp_pub_time:
                     continue
                 # 检查过期资讯并过滤
-                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
-                    self.logger.info(f'新闻过期：{pub_time}|{url}')
+                if self.settings.get('ENABLE_NEWS_TIME_FILTER') and self.check_expire_news(temp_pub_time, self.settings.get('NEWS_EXPIRE_DAYS')):
+                    self.logger.info(f'新闻过期：{temp_pub_time}|{url}')
                     continue
 
-                mod_time = self.to_utc_string(self.name, itm.xpath('./lastmod/text()').extract_first(''))
+                title = ''
+                pub_time = ''
+                mod_time = ''
                 desc = ''
-                lang = itm.xpath('./news/publication/language/text()').extract_first('')
+                lang = ''
                 content = ''
-                source = itm.xpath('./news/publication/name/text()').extract_first('')
+                source = ''
                 keywords = ''
                 images = []
 

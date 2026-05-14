@@ -49,7 +49,7 @@ class UNOrgSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
             itm['mod_time'] = mod_time
 
         d1 = response.xpath('//section[@class="section"]//div[contains(@class, "views-element-container")] | //section[contains(@class, "region-before-content")]//div[contains(@class, "views-element-container")]')
-        clean_text = d1.xpath('.//p | .//h1 | .//h2 | .//h3 | .//h4 | .//h5 | .//h6').xpath('string(.)')
+        clean_text = d1.xpath('.//p | .//h1 | .//h2 | .//h3 | .//h4 | .//h5 | .//h6 .//li').xpath('string(.)')
         txt_list = []
         for p in clean_text.extract():
             _p = self.clean_phrase(p)

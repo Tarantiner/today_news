@@ -183,5 +183,4 @@ class YleSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
 
     def parse_detail_failed(self, failure):
         """详情页请求失败处理"""
-        self.logger.error(f'详情页请求失败: {failure}')
         return

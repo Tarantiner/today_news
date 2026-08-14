@@ -242,7 +242,7 @@ class PreRequestFilterMiddleware:
     DENY_PATTERNS = [
         # 目前真实找到的
         '/tv-and-radio/', '/football/', '/commentisfree/', '/books/', '/film/', '/environment/',
-        '/lifeandstyle/', '/education/', '/culture/', '/thefilter-us/', '/money/', '/travel/', '/food/', '/stage/',
+        '/lifeandstyle/', '/education/', '/culture/', '/thefilter-us/', '/travel/', '/food/', '/stage/',
         '/fashion/', '/games/', '/artanddesign/', '/cities/', '/law/',
         '/inequality/', '/sport/', '/music/', '/media/', '/bulletin/', '/arts-entertainment/',
         '/extras/', '/life-style/', '/health-and-wellbeing/', '/climate-change/',
@@ -275,6 +275,9 @@ class PreRequestFilterMiddleware:
         r'/career/', r'/recruitment/', r'/hiring/',
         r'/weather/', r'/horoscope/', r'/lottery/',
         r'/life/', r'/local/', r'/health/', r'/lotteries',
+
+        # 翻译的
+        r'/translations/'
     ]
 
     def __init__(self, stats):

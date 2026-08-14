@@ -1,5 +1,6 @@
 import re
 import scrapy
+import json
 import datetime
 from w3lib.html import remove_tags_with_content, remove_comments, remove_tags
 from today_news.spiders.spider_helper import SpiderTxtParser, SpiderUtils
@@ -19,23 +20,50 @@ class TvbsSpider(scrapy.Spider, SpiderTxtParser, SpiderUtils):
         return txt.strip().replace('![CDATA[', '').replace(']]', '').strip()
 
     def parse_detail(self, response):
-        d1 = response.xpath('//div[@class="article_content"]')
-        xpath_conditions = [
-            'not(ancestor::div[@class="guangxuan"])',
-            'not(ancestor::div[@class="widely_declared"])',
-            'not(ancestor::span[@class="endtext"])',
-        ]
+        # d1 = response.xpath('//div[@class="article_content"]')
+        # xpath_conditions = [
+        #     'not(ancestor::div[@class="guangxuan"])',
+        #     'not(ancestor::div[@class="widely_declared"])',
+        #     'not(ancestor::span[@class="endtext"])',
+        # ]
 
-        final_xpath = './/text()[' + ' and '.join(xpath_conditions) + ']'
-        clean_text = d1.xpath(final_xpath)
-        txt_list = []
-        for p in clean_text.extract():
-            _p = self.clean_phrase(p)
-            if _p:
-                # print([_p])
-                txt_list.append(_p)
+        # final_xpath = './/text()[' + ' and '.join(xpath_conditions) + ']'
+        # clean_text = d1.xpath(final_xpath)
+        # txt_list = []
+        # for p in clean_text.extract():
+        #     _p = self.clean_phrase(p)
+        #     if _p:
+        #         # print([_p])
+        #         txt_list.append(_p)
+        # itm = response.meta['item']
+        # itm['content'] = '\n'.join(txt_list)
+        # if not itm['content']:
+        #     itm['content'] = 'content'
+
         itm = response.meta['item']
-        itm['content'] = '\n'.join(txt_list)
+        try:
+            data = json.loads(response.xpath('//script[@type="application/ld+json"]/text()').extract_first())
+            content = data['articleBody']
+            itm['content'] = re.sub('(參考資料：.*$)', '', content, flags=re.S)
+            # itm['content'] = data['articleBody']
+            # content_lis = [i for i in data if i['@type']=='NewsArticle']
+            # if content_lis:
+            #     content = content_lis[0]['articleBody']
+            # else:
+            #     content = ''
+            # if not content:
+            #     content_itm_list = sorted([j for i in data if i['@type']=='LiveBlogPosting' for j in i['liveBlogUpdate']], key=lambda x: x['datePublished'])
+            #     content_list = []
+            #     for content_itm in content_itm_list:
+            #         _time = content_itm['datePublished']
+            #         _content = content_itm['articleBody'].rstrip('\n')
+            #         if not _content:
+            #             continue
+            #         content_list.append(f'{_time}:\n{_content}\n' if {_time} else f'{_content}\n')
+            #     content = '\n'.join(content_list)
+            # itm['content'] = content
+        except:
+            itm['content'] = ''
         if not itm['content']:
             itm['content'] = 'content'
 

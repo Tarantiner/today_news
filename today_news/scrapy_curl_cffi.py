@@ -24,8 +24,9 @@ class CurlCffiDownloadHandler(HTTPDownloadHandler):
 
         def _request():
             try:
+                custom_headers = request.meta.get('headers', {})
                 # 支持所有 scrapy Request 的参数
-                headers = request.headers.to_unicode_dict() if request.headers else {}
+                headers = custom_headers if custom_headers else request.headers.to_unicode_dict() if request.headers else {}
                 proxy = request.meta.get('proxy')
 
                 # headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
